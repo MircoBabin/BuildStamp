@@ -1,0 +1,26 @@
+namespace BuildStamp
+{
+    public static class CompilationTime
+    {
+// <BUILDSTAMP:BEGINSTAMP>
+/*
+<BUILDSTAMP:BEGINTEMPLATE>
+        public const string COMPILEDATE = "<BUILDSTAMP:COMPILEDATE>";
+        public const string COMPILETIME = "<BUILDSTAMP:COMPILETIME>";
+        public const string COMPILEDATETIME = "<BUILDSTAMP:COMPILEDATETIME>";
+
+        public const string COMPILEDATEUTC = "<BUILDSTAMP:COMPILEDATE-UTC>";
+        public const string COMPILETIMEUTC = "<BUILDSTAMP:COMPILETIME-UTC>";
+        public const string COMPILEDATETIMEUTC = "<BUILDSTAMP:COMPILEDATETIME-UTC>";
+<BUILDSTAMP:ENDTEMPLATE>
+*/
+        public const string COMPILEDATE = "2023-01-11";
+        public const string COMPILETIME = "20:19:19";
+        public const string COMPILEDATETIME = "2023-01-11T20:19:19.0000000+01:00";
+
+        public const string COMPILEDATEUTC = "2023-01-11";
+        public const string COMPILETIMEUTC = "19:19:19";
+        public const string COMPILEDATETIMEUTC = "2023-01-11T19:19:19.0000000Z";
+// <BUILDSTAMP:ENDSTAMP>
+    }
+}
