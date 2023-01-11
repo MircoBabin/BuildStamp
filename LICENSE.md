@@ -1,4 +1,4 @@
-# BuildStamp Commander
+# BuildStamp
 ## MIT license 
 
 Copyright (c) 2023 Mirco Babin

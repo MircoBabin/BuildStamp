@@ -1,4 +1,4 @@
-# KeePass Commander contributions
+# BuildStamp contributions
 
 All contributions are accepted under [the MIT license](LICENSE.md "license").
 
