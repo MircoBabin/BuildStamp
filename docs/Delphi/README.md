@@ -73,5 +73,3 @@ end.
 * Fourth: Commit prebuild.bat and Compiled.pas into version control (Git).
 
 * Fifth: Build the project from the Delphi IDE. And check the stamped compilation date/time.
-
-* Sixth: Add Compiled.pas to .gitignore and commit .gitignore into version control (Git). Explicitly as a seperate step, don't combine this with the fourth step!
