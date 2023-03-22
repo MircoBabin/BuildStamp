@@ -34,6 +34,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Security" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs">
@@ -41,6 +42,10 @@
     </Compile>
     <Compile Include="CommandOutputInstallationFiles.cs" />
     <Compile Include="CommandOutputVersion.cs" />
+    <Compile Include="CommandSignExecutable.cs" />
+    <Compile Include="DigitallySignExe_Authenticode.cs" />
+    <Compile Include="DigitallySignExe_Rfc3161.cs" />
+    <Compile Include="DigitallySignExe_Verify.cs" />
     <Compile Include="FileEncodingDetector.cs" />
     <Compile Include="CommandStampFile.cs" />
     <Compile Include="CommandShowHelp.cs" />

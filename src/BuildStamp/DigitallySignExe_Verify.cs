@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 
@@ -10,93 +9,12 @@ namespace BuildStamp
     {
         private static class NativeMethods
         {
-            public enum CryptQueryObjectType : UInt32
-            {
-                CERT_QUERY_OBJECT_FILE = 0x1,
-                CERT_QUERY_OBJECT_BLOB = 0x2,
-            }
+            public static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
 
-            [Flags]
-            public enum CryptQueryContentFlagType : UInt32
-            {
-                CERT_QUERY_CONTENT_FLAG_CERT = 1u << (int)CryptQueryContentType.CERT_QUERY_CONTENT_CERT,
-                CERT_QUERY_CONTENT_FLAG_CTL = 1u << (int)CryptQueryContentType.CERT_QUERY_CONTENT_CTL,
-                CERT_QUERY_CONTENT_FLAG_CRL = 1u << (int)CryptQueryContentType.CERT_QUERY_CONTENT_CRL,
-                CERT_QUERY_CONTENT_FLAG_SERIALIZED_STORE = 1u << (int)CryptQueryContentType.CERT_QUERY_CONTENT_SERIALIZED_STORE,
-                CERT_QUERY_CONTENT_FLAG_SERIALIZED_CERT = 1u << (int)CryptQueryContentType.CERT_QUERY_CONTENT_SERIALIZED_CERT,
-                CERT_QUERY_CONTENT_FLAG_SERIALIZED_CTL = 1u << (int)CryptQueryContentType.CERT_QUERY_CONTENT_SERIALIZED_CTL,
-                CERT_QUERY_CONTENT_FLAG_SERIALIZED_CRL = 1u << (int)CryptQueryContentType.CERT_QUERY_CONTENT_SERIALIZED_CRL,
-                CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED = 1u << (int)CryptQueryContentType.CERT_QUERY_CONTENT_PKCS7_SIGNED,
-                CERT_QUERY_CONTENT_FLAG_PKCS7_UNSIGNED = 1u << (int)CryptQueryContentType.CERT_QUERY_CONTENT_PKCS7_UNSIGNED,
-                CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED = 1u << (int)CryptQueryContentType.CERT_QUERY_CONTENT_PKCS7_SIGNED_EMBED,
-                CERT_QUERY_CONTENT_FLAG_PKCS10 = 1u << (int)CryptQueryContentType.CERT_QUERY_CONTENT_PKCS10,
-                CERT_QUERY_CONTENT_FLAG_PFX = 1u << (int)CryptQueryContentType.CERT_QUERY_CONTENT_PFX,
-                CERT_QUERY_CONTENT_FLAG_CERT_PAIR = 1u << (int)CryptQueryContentType.CERT_QUERY_CONTENT_CERT_PAIR,
-                CERT_QUERY_CONTENT_FLAG_PFX_AND_LOAD = 1u << (int)CryptQueryContentType.CERT_QUERY_CONTENT_PFX_AND_LOAD,
-                CERT_QUERY_CONTENT_FLAG_ALL =
-                    CERT_QUERY_CONTENT_FLAG_CERT |
-                    CERT_QUERY_CONTENT_FLAG_CTL |
-                    CERT_QUERY_CONTENT_FLAG_CRL |
-                    CERT_QUERY_CONTENT_FLAG_SERIALIZED_STORE |
-                    CERT_QUERY_CONTENT_FLAG_SERIALIZED_CERT |
-                    CERT_QUERY_CONTENT_FLAG_SERIALIZED_CTL |
-                    CERT_QUERY_CONTENT_FLAG_SERIALIZED_CRL |
-                    CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED |
-                    CERT_QUERY_CONTENT_FLAG_PKCS7_UNSIGNED |
-                    CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED |
-                    CERT_QUERY_CONTENT_FLAG_PKCS10 |
-                    CERT_QUERY_CONTENT_FLAG_PFX |
-                    CERT_QUERY_CONTENT_FLAG_CERT_PAIR, //wincrypt.h purposefully omits CERT_QUERY_CONTENT_FLAG_PFX_AND_LOAD
-                CERT_QUERY_CONTENT_FLAG_ALL_ISSUER_CERT =
-                    CERT_QUERY_CONTENT_FLAG_CERT |
-                    CERT_QUERY_CONTENT_FLAG_SERIALIZED_STORE |
-                    CERT_QUERY_CONTENT_FLAG_SERIALIZED_CERT |
-                    CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED |
-                    CERT_QUERY_CONTENT_FLAG_PKCS7_UNSIGNED
-            }
+            public static Guid WINTRUST_ACTION_GENERIC_VERIFY_V2 = new Guid("{00AAC56B-CD44-11d0-8CC2-00C04FC295EE}");
 
-            public enum CryptQueryContentType : UInt32
-            {
-                CERT_QUERY_CONTENT_CERT = 1,
-                CERT_QUERY_CONTENT_CTL = 2,
-                CERT_QUERY_CONTENT_CRL = 3,
-                CERT_QUERY_CONTENT_SERIALIZED_STORE = 4,
-                CERT_QUERY_CONTENT_SERIALIZED_CERT = 5,
-                CERT_QUERY_CONTENT_SERIALIZED_CTL = 6,
-                CERT_QUERY_CONTENT_SERIALIZED_CRL = 7,
-                CERT_QUERY_CONTENT_PKCS7_SIGNED = 8,
-                CERT_QUERY_CONTENT_PKCS7_UNSIGNED = 9,
-                CERT_QUERY_CONTENT_PKCS7_SIGNED_EMBED = 10,
-                CERT_QUERY_CONTENT_PKCS10 = 11,
-                CERT_QUERY_CONTENT_PFX = 12,
-                CERT_QUERY_CONTENT_CERT_PAIR = 13,
-                CERT_QUERY_CONTENT_PFX_AND_LOAD = 14
-            }
-
-            public enum CryptQueryFormatType : UInt32
-            {
-                CERT_QUERY_FORMAT_BINARY = 1,
-                CERT_QUERY_FORMAT_BASE64_ENCODED = 2,
-                CERT_QUERY_FORMAT_ASN_ASCII_HEX_ENCODED = 3
-            }
-
-            [Flags]
-            public enum CryptQueryFormatFlagType : UInt32
-            {
-                CERT_QUERY_FORMAT_FLAG_BINARY = 1u << (int)CryptQueryFormatType.CERT_QUERY_FORMAT_BINARY,
-                CERT_QUERY_FORMAT_FLAG_BASE64_ENCODED = 1u << (int)CryptQueryFormatType.CERT_QUERY_FORMAT_BASE64_ENCODED,
-                CERT_QUERY_FORMAT_FLAG_ASN_ASCII_HEX_ENCODED = 1u << (int)CryptQueryFormatType.CERT_QUERY_FORMAT_ASN_ASCII_HEX_ENCODED,
-                CERT_QUERY_FORMAT_FLAG_ALL =
-                    CERT_QUERY_FORMAT_FLAG_BINARY |
-                    CERT_QUERY_FORMAT_FLAG_BASE64_ENCODED |
-                    CERT_QUERY_FORMAT_FLAG_ASN_ASCII_HEX_ENCODED
-            }
-
-            [Flags]
-            public enum CryptQueryObjectFlags : UInt32
-            {
-                NONE = 0
-            }
+            public const string szOID_RSA_counterSign = "1.2.840.113549.1.9.6";
+            public const string szOID_RSA_signingTime = "1.2.840.113549.1.9.5";
 
             [Flags]
             public enum EncodingType : UInt32
@@ -105,49 +23,178 @@ namespace BuildStamp
                 X509_ASN_ENCODING = 0x1
             }
 
-            [Flags]
-            public enum CryptDecodeFlags : UInt32
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct WINTRUST_FILE_INFO
             {
-                CRYPT_DECODE_ALLOC_FLAG = 0x8000
+                public UInt32 cbStruct;
+                [MarshalAs(UnmanagedType.LPWStr)] public string pcwszFilePath;
+                public IntPtr hFile;
+                public IntPtr pgKnownSubject; // GUID
             }
 
-            public enum CryptMsgParamType : UInt32
+            [StructLayout(LayoutKind.Sequential)]
+            public struct WINTRUST_DATA
             {
-                CMSG_TYPE_PARAM = 1,
-                CMSG_CONTENT_PARAM = 2,
-                CMSG_BARE_CONTENT_PARAM = 3,
-                CMSG_INNER_CONTENT_TYPE_PARAM = 4,
-                CMSG_SIGNER_COUNT_PARAM = 5,
-                CMSG_SIGNER_INFO_PARAM = 6,
-                CMSG_SIGNER_CERT_INFO_PARAM = 7,
-                CMSG_SIGNER_HASH_ALGORITHM_PARAM = 8,
-                CMSG_SIGNER_AUTH_ATTR_PARAM = 9,
-                CMSG_SIGNER_UNAUTH_ATTR_PARAM = 10,
-                CMSG_CERT_COUNT_PARAM = 11,
-                CMSG_CERT_PARAM = 12,
-                CMSG_CRL_COUNT_PARAM = 13,
-                CMSG_CRL_PARAM = 14,
-                CMSG_ENVELOPE_ALGORITHM_PARAM = 15,
-                CMSG_RECIPIENT_COUNT_PARAM = 17,
-                CMSG_RECIPIENT_INDEX_PARAM = 18,
-                CMSG_RECIPIENT_INFO_PARAM = 19,
-                CMSG_HASH_ALGORITHM_PARAM = 20,
-                CMSG_HASH_DATA_PARAM = 21,
-                CMSG_COMPUTED_HASH_PARAM = 22,
-                CMSG_ENCRYPT_PARAM = 26,
-                CMSG_ENCRYPTED_DIGEST = 27,
-                CMSG_ENCODED_SIGNER = 28,
-                CMSG_ENCODED_MESSAGE = 29,
-                CMSG_VERSION_PARAM = 30,
-                CMSG_ATTR_CERT_COUNT_PARAM = 31,
-                CMSG_ATTR_CERT_PARAM = 32,
-                CMSG_CMS_RECIPIENT_COUNT_PARAM = 33,
-                CMSG_CMS_RECIPIENT_INDEX_PARAM = 34,
-                CMSG_CMS_RECIPIENT_ENCRYPTED_KEY_INDEX_PARAM = 35,
-                CMSG_CMS_RECIPIENT_INFO_PARAM = 36,
-                CMSG_UNPROTECTED_ATTR_PARAM = 37,
-                CMSG_SIGNER_CERT_ID_PARAM = 38,
-                CMSG_CMS_SIGNER_INFO_PARAM = 39,
+                public UInt32 cbStruct;
+                public IntPtr pPolicyCallbackData;
+                public IntPtr pSIPClientData;
+                public WINTRUST_DATA_UIChoice dwUIChoice;
+                public WINTRUST_DATA_RevocationChecks fdwRevocationChecks;
+                public WINTRUST_DATA_UnionChoice dwUnionChoice;
+
+                /* WINTRUST_FILE_INFO    pFile;
+                 * WINTRUST_CATALOG_INFO pCatalog;
+                 * WINTRUST_BLOB_INFO    pBlob
+                 * WINTRUST_SGNR_INFO    pSgnr;
+                 * WINTRUST_CERT_INFO    pCert;
+                 */
+                public IntPtr Union;
+
+                public WINTRUST_DATA_StateAction dwStateAction;
+                public IntPtr hWVTStateData;
+                public IntPtr pwszURLReference; // Reserved for future use. Set to NULL.
+                public WINTRUST_DATA_ProvFlags dwProvFlags;
+                public WINTRUST_DATA_UIContext dwUIContext;
+                public IntPtr pSignatureSettings; // WINTRUST_SIGNATURE_SETTINGS
+            }
+
+            public enum WINTRUST_DATA_UIChoice : UInt32
+            {
+                WTD_UI_ALL = 1,
+                WTD_UI_NONE = 2,
+                WTD_UI_NOBAD = 3,
+                WTD_UI_NOGOOD = 4,
+            }
+
+            public enum WINTRUST_DATA_RevocationChecks : UInt32
+            {
+                WTD_REVOKE_NONE = 0,
+                WTD_REVOKE_WHOLECHAIN = 1,
+            }
+
+            public enum WINTRUST_DATA_UnionChoice : UInt32
+            {
+                WTD_CHOICE_FILE = 1,
+                WTD_CHOICE_CATALOG = 2,
+                WTD_CHOICE_BLOB = 3,
+                WTD_CHOICE_SIGNER = 4,
+                WTD_CHOICE_CERT = 5,
+            }
+
+            public enum WINTRUST_DATA_StateAction : UInt32
+            {
+                WTD_STATEACTION_IGNORE = 0x00000000,
+                WTD_STATEACTION_VERIFY = 0x00000001,
+                WTD_STATEACTION_CLOSE = 0x00000002,
+                WTD_STATEACTION_AUTO_CACHE = 0x00000003,
+                WTD_STATEACTION_AUTO_CACHE_FLUSH = 0x00000004,
+            }
+
+            [Flags]
+            public enum WINTRUST_DATA_ProvFlags : UInt32
+            {
+                WTD_USE_IE4_TRUST_FLAG = 0x1,
+                WTD_NO_IE4_CHAIN_FLAG = 0x2,
+                WTD_NO_POLICY_USAGE_FLAG = 0x4,
+                WTD_REVOCATION_CHECK_NONE = 0x10,
+                WTD_REVOCATION_CHECK_END_CERT = 0x20,
+                WTD_REVOCATION_CHECK_CHAIN = 0x40,
+                WTD_REVOCATION_CHECK_CHAIN_EXCLUDE_ROOT = 0x80,
+                WTD_SAFER_FLAG = 0x100,
+                WTD_HASH_ONLY_FLAG = 0x200,
+                WTD_USE_DEFAULT_OSVER_CHECK = 0x400,
+                WTD_LIFETIME_SIGNING_FLAG = 0x800,
+                WTD_CACHE_ONLY_URL_RETRIEVAL = 0x1000,
+                WTD_DISABLE_MD2_MD4 = 0x2000,
+                WTD_MOTW = 0x4000,
+            }
+
+            public enum WINTRUST_DATA_UIContext : UInt32
+            {
+                WTD_UICONTEXT_EXECUTE = 0,
+                WTD_UICONTEXT_INSTALL = 1,
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct WINTRUST_SIGNATURE_SETTINGS
+            {
+                public UInt32 cbStruct;
+                public UInt32 dwIndex;
+                public WINTRUST_SIGNATURE_SETTINGS_Flags dwFlags;
+                public UInt32 cSecondarySigs;
+                public UInt32 dwVerifiedSigIndex;
+                public IntPtr pCryptoPolicy; // PCERT_STRONG_SIGN_PARA 
+            }
+
+            public enum WINTRUST_SIGNATURE_SETTINGS_Flags : UInt32
+            {
+                WSS_VERIFY_SPECIFIC = 0x00000001,
+                WSS_GET_SECONDARY_SIG_COUNT = 0x00000002,
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct CRYPT_PROVIDER_DATA
+            {
+                public UInt32 cbStruct;
+                public IntPtr pWintrustData; // WINTRUST_DATA
+                [MarshalAs(UnmanagedType.Bool)] public bool fOpenedFile;
+                public IntPtr hWndParent;
+                public IntPtr pgActionID; //GUID
+                public IntPtr hProv; //HCRYPTPROV
+                public UInt32 dwError;
+                public UInt32 dwRegSecuritySettings;
+                public UInt32 dwRegPolicySettings;
+                public IntPtr psPfns; // CRYPT_PROVIDER_FUNCTIONS
+
+                public UInt32 cdwTrustStepErrors;
+                public IntPtr padwTrustStepErrors;
+
+                public UInt32 chStores;
+                public IntPtr pahStores;
+
+                public UInt32 dwEncoding;
+                public IntPtr hMsg; // HCRYPTMSG
+
+                public UInt32 csSigners;
+                public IntPtr pasSigners;
+
+                public UInt32 csProvPrivData;
+                public IntPtr pasProvPrivData;
+
+                public UInt32 dwSubjectChoice;
+                public IntPtr Subject;
+
+                [MarshalAs(UnmanagedType.LPStr)] public string pszUsageOID;
+                [MarshalAs(UnmanagedType.Bool)] public bool fRecallWithState;
+                public System.Runtime.InteropServices.ComTypes.FILETIME sftSystemTime;
+                [MarshalAs(UnmanagedType.LPStr)] public string pszCTLSignerUsageOID;
+                public UInt32 dwProvFlags;
+                public UInt32 dwFinalError;
+                public IntPtr pRequestUsage; // PCERT_USAGE_MATCH                   
+                public UInt32 dwTrustPubSettings;
+                public UInt32 dwUIStateFlags;
+                public IntPtr pSigState; // CRYPT_PROVIDER_SIGSTATE
+                public IntPtr pSigSettings; // WINTRUST_SIGNATURE_SETTINGS
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            public struct CRYPT_PROVIDER_SGNR
+            {
+                public UInt32 cbStruct;
+                public System.Runtime.InteropServices.ComTypes.FILETIME sftVerifyAsOf;
+
+                public UInt32 csCertChain;
+                public IntPtr pasCertChain; // CRYPT_PROVIDER_CERT
+
+                public UInt32 dwSignerType;
+                public IntPtr psSigner; // CMSG_SIGNER_INFO
+                public UInt32 dwError;
+
+                public UInt32 csCounterSigners;
+                public IntPtr pasCounterSigners; // CRYPT_PROVIDER_SGNR 
+
+                public IntPtr pChainContext; // CERT_CHAIN_CONTEXT        
             }
 
             [StructLayout(LayoutKind.Sequential)]
@@ -192,453 +239,276 @@ namespace BuildStamp
                 public IntPtr rgAttr;
             }
 
-            // cert info flags.
-            public const uint CERT_INFO_VERSION_FLAG = 1;
-            public const uint CERT_INFO_SERIAL_NUMBER_FLAG = 2;
-            public const uint CERT_INFO_SIGNATURE_ALGORITHM_FLAG = 3;
-            public const uint CERT_INFO_ISSUER_FLAG = 4;
-            public const uint CERT_INFO_NOT_BEFORE_FLAG = 5;
-            public const uint CERT_INFO_NOT_AFTER_FLAG = 6;
-            public const uint CERT_INFO_SUBJECT_FLAG = 7;
-            public const uint CERT_INFO_SUBJECT_PUBLIC_KEY_INFO_FLAG = 8;
-            public const uint CERT_INFO_ISSUER_UNIQUE_ID_FLAG = 9;
-            public const uint CERT_INFO_SUBJECT_UNIQUE_ID_FLAG = 10;
-            public const uint CERT_INFO_EXTENSION_FLAG = 11;
-
-            // cert compare flags.
-            public const uint CERT_COMPARE_MASK = 0xFFFF;
-            public const uint CERT_COMPARE_SHIFT = 16;
-            public const uint CERT_COMPARE_ANY = 0;
-            public const uint CERT_COMPARE_SHA1_HASH = 1;
-            public const uint CERT_COMPARE_NAME = 2;
-            public const uint CERT_COMPARE_ATTR = 3;
-            public const uint CERT_COMPARE_MD5_HASH = 4;
-            public const uint CERT_COMPARE_PROPERTY = 5;
-            public const uint CERT_COMPARE_PUBLIC_KEY = 6;
-            public const uint CERT_COMPARE_HASH = CERT_COMPARE_SHA1_HASH;
-            public const uint CERT_COMPARE_NAME_STR_A = 7;
-            public const uint CERT_COMPARE_NAME_STR_W = 8;
-            public const uint CERT_COMPARE_KEY_SPEC = 9;
-            public const uint CERT_COMPARE_ENHKEY_USAGE = 10;
-            public const uint CERT_COMPARE_CTL_USAGE = CERT_COMPARE_ENHKEY_USAGE;
-            public const uint CERT_COMPARE_SUBJECT_CERT = 11;
-            public const uint CERT_COMPARE_ISSUER_OF = 12;
-            public const uint CERT_COMPARE_EXISTING = 13;
-            public const uint CERT_COMPARE_SIGNATURE_HASH = 14;
-            public const uint CERT_COMPARE_KEY_IDENTIFIER = 15;
-            public const uint CERT_COMPARE_CERT_ID = 16;
-            public const uint CERT_COMPARE_CROSS_CERT_DIST_POINTS = 17;
-            public const uint CERT_COMPARE_PUBKEY_MD5_HASH = 18;
-
-            // cert find flags.
-            public const uint CERT_FIND_ANY = ((int)CERT_COMPARE_ANY << (int)CERT_COMPARE_SHIFT);
-            public const uint CERT_FIND_SHA1_HASH = ((int)CERT_COMPARE_SHA1_HASH << (int)CERT_COMPARE_SHIFT);
-            public const uint CERT_FIND_MD5_HASH = ((int)CERT_COMPARE_MD5_HASH << (int)CERT_COMPARE_SHIFT);
-            public const uint CERT_FIND_SIGNATURE_HASH = ((int)CERT_COMPARE_SIGNATURE_HASH << (int)CERT_COMPARE_SHIFT);
-            public const uint CERT_FIND_KEY_IDENTIFIER = ((int)CERT_COMPARE_KEY_IDENTIFIER << (int)CERT_COMPARE_SHIFT);
-            public const uint CERT_FIND_HASH = CERT_FIND_SHA1_HASH;
-            public const uint CERT_FIND_PROPERTY = ((int)CERT_COMPARE_PROPERTY << (int)CERT_COMPARE_SHIFT);
-            public const uint CERT_FIND_PUBLIC_KEY = ((int)CERT_COMPARE_PUBLIC_KEY << (int)CERT_COMPARE_SHIFT);
-            public const uint CERT_FIND_SUBJECT_NAME = ((int)CERT_COMPARE_NAME << (int)CERT_COMPARE_SHIFT | (int)CERT_INFO_SUBJECT_FLAG);
-            public const uint CERT_FIND_SUBJECT_ATTR = ((int)CERT_COMPARE_ATTR << (int)CERT_COMPARE_SHIFT | (int)CERT_INFO_SUBJECT_FLAG);
-            public const uint CERT_FIND_ISSUER_NAME = ((int)CERT_COMPARE_NAME << (int)CERT_COMPARE_SHIFT | (int)CERT_INFO_ISSUER_FLAG);
-            public const uint CERT_FIND_ISSUER_ATTR = ((int)CERT_COMPARE_ATTR << (int)CERT_COMPARE_SHIFT | (int)CERT_INFO_ISSUER_FLAG);
-            public const uint CERT_FIND_SUBJECT_STR_A = ((int)CERT_COMPARE_NAME_STR_A << (int)CERT_COMPARE_SHIFT | (int)CERT_INFO_SUBJECT_FLAG);
-            public const uint CERT_FIND_SUBJECT_STR_W = ((int)CERT_COMPARE_NAME_STR_W << (int)CERT_COMPARE_SHIFT | (int)CERT_INFO_SUBJECT_FLAG);
-            public const uint CERT_FIND_SUBJECT_STR = CERT_FIND_SUBJECT_STR_W;
-            public const uint CERT_FIND_ISSUER_STR_A = ((int)CERT_COMPARE_NAME_STR_A << (int)CERT_COMPARE_SHIFT | (int)CERT_INFO_ISSUER_FLAG);
-            public const uint CERT_FIND_ISSUER_STR_W = ((int)CERT_COMPARE_NAME_STR_W << (int)CERT_COMPARE_SHIFT | (int)CERT_INFO_ISSUER_FLAG);
-            public const uint CERT_FIND_ISSUER_STR = CERT_FIND_ISSUER_STR_W;
-            public const uint CERT_FIND_KEY_SPEC = ((int)CERT_COMPARE_KEY_SPEC << (int)CERT_COMPARE_SHIFT);
-            public const uint CERT_FIND_ENHKEY_USAGE = ((int)CERT_COMPARE_ENHKEY_USAGE << (int)CERT_COMPARE_SHIFT);
-            public const uint CERT_FIND_CTL_USAGE = CERT_FIND_ENHKEY_USAGE;
-            public const uint CERT_FIND_SUBJECT_CERT = ((int)CERT_COMPARE_SUBJECT_CERT << (int)CERT_COMPARE_SHIFT);
-            public const uint CERT_FIND_ISSUER_OF = ((int)CERT_COMPARE_ISSUER_OF << (int)CERT_COMPARE_SHIFT);
-            public const uint CERT_FIND_EXISTING = ((int)CERT_COMPARE_EXISTING << (int)CERT_COMPARE_SHIFT);
-            public const uint CERT_FIND_CERT_ID = ((int)CERT_COMPARE_CERT_ID << (int)CERT_COMPARE_SHIFT);
-            public const uint CERT_FIND_CROSS_CERT_DIST_POINTS = ((int)CERT_COMPARE_CROSS_CERT_DIST_POINTS << (int)CERT_COMPARE_SHIFT);
-            public const uint CERT_FIND_PUBKEY_MD5_HASH = ((int)CERT_COMPARE_PUBKEY_MD5_HASH << (int)CERT_COMPARE_SHIFT);
-
             [StructLayout(LayoutKind.Sequential)]
-            public struct CERT_INFO
+            public struct CRYPT_ATTRIBUTE
             {
-                public UInt32 dwVersion;
-                public CRYPTOAPI_BLOB SerialNumber;
-                public CRYPT_ALGORITHM_IDENTIFIER SignatureAlgorithm;
-                public CRYPTOAPI_BLOB Issuer;
-                public FILETIME NotBefore;
-                public FILETIME NotAfter;
-                public CRYPTOAPI_BLOB Subject;
-                public CERT_PUBLIC_KEY_INFO SubjectPublicKeyInfo;
-                public CRYPT_BIT_BLOB IssuerUniqueId;
-                public CRYPT_BIT_BLOB SubjectUniqueId;
-                public UInt32 cExtension;
-                public IntPtr rgExtension;
+                [MarshalAs(UnmanagedType.LPStr)] public string pszObjId;
+                public UInt32 cValue;
+                public IntPtr rgValue; // CRYPTOAPI_BLOB 
             }
 
             [StructLayout(LayoutKind.Sequential)]
-            public struct FILETIME
+            public struct CRYPT_PROVIDER_CERT
             {
-                public UInt32 DateTimeLow;
-                public UInt32 DateTimeHigh;
-            }
-
-            [StructLayout(LayoutKind.Sequential)]
-            public struct CERT_PUBLIC_KEY_INFO
-            {
-                public CRYPT_ALGORITHM_IDENTIFIER Algorithm;
-                public CRYPT_BIT_BLOB PublicKey;
+                public UInt32 cbStruct;
+                public IntPtr pCert; // CERT_CONTEXT
+                [MarshalAs(UnmanagedType.Bool)] public bool fCommercial;
+                [MarshalAs(UnmanagedType.Bool)] public bool fTrustedRoot;
+                [MarshalAs(UnmanagedType.Bool)] public bool fSelfSigned;
+                [MarshalAs(UnmanagedType.Bool)] public bool fTestCert;
+                public UInt32 dwRevokedReason;
+                public UInt32 dwConfidence;
+                public UInt32 dwError;
+                public IntPtr pTrustListContext; // CTL_CONTEXT
+                [MarshalAs(UnmanagedType.Bool)] public bool fTrustListSignerCert;
+                public IntPtr pCtlContext;// CTL_CONTEXT
+                public UInt32 dwCtlError;
+                [MarshalAs(UnmanagedType.Bool)] public bool fIsCyclic;
+                public IntPtr pChainElement; // CERT_CHAIN_ELEMENT 
             }
 
             [StructLayout(LayoutKind.Sequential)]
             public struct CERT_CONTEXT
             {
-                public Int32 dwCertEncodingType;
+                public UInt32 dwCertEncodingType;
                 public IntPtr pbCertEncoded;
-                public Int32 cbCertEncoded;
+                public UInt32 cbCertEncoded;
                 public IntPtr pCertInfo;
                 public IntPtr hCertStore;
             }
 
-            public static byte[] GetBytesFromBlob(CRYPTOAPI_BLOB blob)
-            {
-                byte[] result = new byte[blob.cbData];
+            [DllImport("wintrust.dll", CallingConvention = CallingConvention.StdCall, ExactSpelling = true)]
+            public static extern Int32 WinVerifyTrust(IntPtr hWind, IntPtr pgActionID, IntPtr pWVTData);
 
-                Marshal.PtrToStructure(blob.pbData, result);
+            [DllImport("wintrust.dll", CallingConvention = CallingConvention.StdCall, ExactSpelling = true)]
+            public static extern IntPtr WTHelperProvDataFromStateData(IntPtr hStateData);
 
-                return result;
-            }
+            [DllImport("wintrust.dll", CallingConvention = CallingConvention.StdCall, ExactSpelling = true)]
+            public static extern IntPtr WTHelperGetProvSignerFromChain(
+                IntPtr pProvData, 
+                UInt32 idxSigner, 
+                [MarshalAs(UnmanagedType.Bool)] bool fCounterSigner, 
+                UInt32 idxCounterSigner);
 
-            [method: DllImport("crypt32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "CryptQueryObject", SetLastError = true)]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            public static extern bool CryptQueryObject(
-                CryptQueryObjectType dwObjectType,
-                [MarshalAs(UnmanagedType.LPWStr)] string pvObject,
-                CryptQueryContentFlagType dwExpectedContentTypeFlags,
-                CryptQueryFormatFlagType dwExpectedFormatTypeFlags,
-                CryptQueryObjectFlags dwFlags,
-                out EncodingType pdwMsgAndCertEncodingType,
-                out CryptQueryContentType pdwContentType,
-                out CryptQueryFormatType pdwFormatType,
-                out IntPtr phCertStore,
-                out IntPtr phMsg,
-                IntPtr ppvContext);
-
-            [method: DllImport("crypt32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "CryptMsgClose", SetLastError = true)]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            public static extern bool CryptMsgClose(IntPtr hCryptMsg);
-
-            [method: DllImport("crypt32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "CryptMsgGetParam", SetLastError = true)]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            public static extern bool CryptMsgGetParam(
-                IntPtr hCryptMsg,
-                CryptMsgParamType dwParamType,
-                UInt32 dwIndex,
-                IntPtr pvData,
-                ref UInt32 pcbData);
-
-            [method: DllImport("crypt32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "CertFindCertificateInStore", SetLastError = true)]
-            public static extern IntPtr CertFindCertificateInStore(
-                IntPtr hCertStore,
-                EncodingType dwCertEncodingType,
-                UInt32 dwFindFlags,
-                UInt32 dwFindType,
-                IntPtr pvFindPara,
-                IntPtr pPrevCertContext);
-
-            [method: DllImport("crypt32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "CertFreeCertificateContext")]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            public static extern bool CertFreeCertificateContext(IntPtr pCertContext);
-
-            [method: DllImport("crypt32.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "CertCloseStore", SetLastError = true)]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            public static extern bool CertCloseStore(
-                IntPtr hCertStore,
-                UInt32 dwFlags);
+            [DllImport("wintrust.dll", CallingConvention = CallingConvention.StdCall, ExactSpelling = true)]
+            public static extern IntPtr WTHelperGetProvCertFromChain(IntPtr pSgnr, UInt32 idxCert);
         }
 
-
-        public static void RetrieveSignatures(string exeFilename)
-        {
-            // Todo: use WinVerifyTrust
-            // https://stackoverflow.com/questions/24892531/reading-multiple-signatures-from-executable-file
-            // https://stackoverflow.com/questions/21547311/how-to-dual-sign-a-binary-with-authenticode
-
-            IntPtr hMsg = IntPtr.Zero;
-            IntPtr hCertStore = IntPtr.Zero;
-            try
-            {
-                NativeMethods.EncodingType MsgAndCertEncodingType;
-                NativeMethods.CryptQueryContentType ContentType;
-                NativeMethods.CryptQueryFormatType FormatType;
-                if (!NativeMethods.CryptQueryObject(
-                    NativeMethods.CryptQueryObjectType.CERT_QUERY_OBJECT_FILE,
-                    exeFilename,
-                    NativeMethods.CryptQueryContentFlagType.CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED | NativeMethods.CryptQueryContentFlagType.CERT_QUERY_CONTENT_FLAG_PKCS7_UNSIGNED | NativeMethods.CryptQueryContentFlagType.CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED,
-                    NativeMethods.CryptQueryFormatFlagType.CERT_QUERY_FORMAT_FLAG_BINARY,
-                    NativeMethods.CryptQueryObjectFlags.NONE,
-                    out MsgAndCertEncodingType,
-                    out ContentType,
-                    out FormatType,
-                    out hCertStore,
-                    out hMsg,
-                    IntPtr.Zero))
-                {
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
-                }
-
-                // GetSignatures(hCertStore, hMsg);
-            }
-            finally
-            {
-                NativeMethods.CryptMsgClose(hMsg);
-                NativeMethods.CertCloseStore(hCertStore, 0);
-            }
-        }
-
-        /*
-         * Does not work. When signed with both SHA-1 and SHA-256 only the SHA-1 signature is returned.
-         *
         public class Signature
         {
             public string HashAlgorithmOid { get; set; }
-            public string HashEncryptionAlgorithmOid { get; set; }
             public X509Certificate2 SignerCertificate { get; set; }
+
+            public List<CounterSignature> CounterSignatures { get; set; }
+
+            public Signature()
+            {
+                CounterSignatures = new List<CounterSignature>();
+            }
         }
 
-        private static List<Signature> GetSignatures(IntPtr hCertStore, IntPtr hMsg)
+        public class CounterSignature
         {
-            // https://learn.microsoft.com/en-us/troubleshoot/windows/win32/get-information-authenticode-signed-executables
+            public string HashAlgorithmOid { get; set; }
+            public X509Certificate2 SignerCertificate { get; set; }
+            public DateTime? Timestamp;
+        }
 
-            UInt32 signerCount = 0;
-            UInt32 signerCountSize = (UInt32)Marshal.SizeOf(signerCount);
-            IntPtr signerCountPtr;
-            signerCountPtr = Marshal.AllocHGlobal((int)signerCountSize);
-            Marshal.StructureToPtr(signerCount, signerCountPtr, false);
+        public static List<Signature> RetrieveSignatures(string exeFilename)
+        {
+            List<Signature> signatures = new List<Signature>();
+
+            IntPtr actionIdBytesPtr = IntPtr.Zero;
+            IntPtr fileInfoPtr = IntPtr.Zero;
+            IntPtr signatureSettingsPtr = IntPtr.Zero;
+            IntPtr trustDataPtr = IntPtr.Zero;
             try
             {
-                if (!NativeMethods.CryptMsgGetParam(
-                    hMsg,
-                    NativeMethods.CryptMsgParamType.CMSG_SIGNER_COUNT_PARAM,
-                    0,
-                    signerCountPtr,
-                    ref signerCountSize))
+                byte[] actionIdBytes = NativeMethods.WINTRUST_ACTION_GENERIC_VERIFY_V2.ToByteArray();
+                actionIdBytesPtr = Marshal.AllocHGlobal(actionIdBytes.Length);
+                Marshal.Copy(actionIdBytes, 0, actionIdBytesPtr, actionIdBytes.Length);
+
+                NativeMethods.WINTRUST_FILE_INFO fileInfo = new NativeMethods.WINTRUST_FILE_INFO()
                 {
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
-                }
-                signerCount = (UInt32)Marshal.PtrToStructure(signerCountPtr, typeof(UInt32));
-                if (signerCount == 0)
+                    cbStruct = (UInt32)Marshal.SizeOf(typeof(NativeMethods.WINTRUST_FILE_INFO)),
+                    pcwszFilePath = exeFilename,
+                    hFile = IntPtr.Zero,
+                    pgKnownSubject = IntPtr.Zero,
+                };
+                fileInfoPtr = Marshal.AllocHGlobal((int)fileInfo.cbStruct);
+                Marshal.StructureToPtr(fileInfo, fileInfoPtr, false);
+
+                NativeMethods.WINTRUST_SIGNATURE_SETTINGS signatureSettings = new NativeMethods.WINTRUST_SIGNATURE_SETTINGS()
                 {
-                    return new List<Signature>();
+                    cbStruct = (UInt32)Marshal.SizeOf(typeof(NativeMethods.WINTRUST_SIGNATURE_SETTINGS)),
+                    dwIndex = 0,
+                    dwFlags = NativeMethods.WINTRUST_SIGNATURE_SETTINGS_Flags.WSS_GET_SECONDARY_SIG_COUNT,
+                    cSecondarySigs = 0,
+                    dwVerifiedSigIndex = 0,
+                    pCryptoPolicy = IntPtr.Zero,
+                };
+                signatureSettingsPtr = Marshal.AllocHGlobal((int)signatureSettings.cbStruct);
+                Marshal.StructureToPtr(signatureSettings, signatureSettingsPtr, false);
+
+                NativeMethods.WINTRUST_DATA trustData = new NativeMethods.WINTRUST_DATA()
+                {
+                    cbStruct = (UInt32)Marshal.SizeOf(typeof(NativeMethods.WINTRUST_DATA)),
+                    pPolicyCallbackData = IntPtr.Zero,
+                    pSIPClientData = IntPtr.Zero,
+                    dwUIChoice = NativeMethods.WINTRUST_DATA_UIChoice.WTD_UI_NONE,
+                    fdwRevocationChecks = NativeMethods.WINTRUST_DATA_RevocationChecks.WTD_REVOKE_NONE,
+                    dwUnionChoice = NativeMethods.WINTRUST_DATA_UnionChoice.WTD_CHOICE_FILE,
+                    Union = fileInfoPtr,
+                    dwStateAction = NativeMethods.WINTRUST_DATA_StateAction.WTD_STATEACTION_IGNORE,
+                    hWVTStateData = IntPtr.Zero,
+                    pwszURLReference = IntPtr.Zero,
+                    dwProvFlags = NativeMethods.WINTRUST_DATA_ProvFlags.WTD_REVOCATION_CHECK_NONE,
+                    dwUIContext = NativeMethods.WINTRUST_DATA_UIContext.WTD_UICONTEXT_EXECUTE,
+                    pSignatureSettings = signatureSettingsPtr,
+                };
+                trustDataPtr = Marshal.AllocHGlobal((int)trustData.cbStruct);
+                Marshal.StructureToPtr(trustData, trustDataPtr, false);
+
+                {
+                    int result = NativeMethods.WinVerifyTrust(NativeMethods.INVALID_HANDLE_VALUE, actionIdBytesPtr, trustDataPtr);
+                    if (result != 0)
+                        throw new Exception(string.Format("WinVerifyTrust() failed with 0x{0:X}", result));
+                    signatureSettings = (NativeMethods.WINTRUST_SIGNATURE_SETTINGS)Marshal.PtrToStructure(signatureSettingsPtr, typeof(NativeMethods.WINTRUST_SIGNATURE_SETTINGS));
                 }
 
-                var result = new List<Signature>();
-                for (UInt32 i = 0; i < signerCount; i++)
+                UInt32 signatureCount = signatureSettings.cSecondarySigs + 1;
+                for (UInt32 dwIndex = 0; dwIndex < signatureCount; dwIndex++)
                 {
-                    UInt32 signerSize = 0;
-                    IntPtr signerPtr;
-                    if (!NativeMethods.CryptMsgGetParam(
-                        hMsg,
-                        NativeMethods.CryptMsgParamType.CMSG_SIGNER_INFO_PARAM,
-                        i,
-                        IntPtr.Zero,
-                        ref signerSize))
+                    signatureSettings.dwIndex = dwIndex;
+                    signatureSettings.dwFlags = NativeMethods.WINTRUST_SIGNATURE_SETTINGS_Flags.WSS_VERIFY_SPECIFIC;
+                    Marshal.StructureToPtr(signatureSettings, signatureSettingsPtr, false);
+
+                    trustData.dwStateAction = NativeMethods.WINTRUST_DATA_StateAction.WTD_STATEACTION_VERIFY;
+                    trustData.hWVTStateData = IntPtr.Zero;
+                    Marshal.StructureToPtr(trustData, trustDataPtr, false);
+
                     {
-                        continue;
+                        int result = NativeMethods.WinVerifyTrust(NativeMethods.INVALID_HANDLE_VALUE, actionIdBytesPtr, trustDataPtr);
+                        if (result != 0)
+                            continue;
+                        trustData = (NativeMethods.WINTRUST_DATA)Marshal.PtrToStructure(trustDataPtr, typeof(NativeMethods.WINTRUST_DATA));
                     }
 
-                    signerPtr = Marshal.AllocHGlobal((int)signerSize);
                     try
                     {
-                        if (!NativeMethods.CryptMsgGetParam(
-                            hMsg,
-                            NativeMethods.CryptMsgParamType.CMSG_SIGNER_INFO_PARAM,
-                            i,
-                            signerPtr,
-                            ref signerSize))
+                        IntPtr cryptProviderDataPtr = NativeMethods.WTHelperProvDataFromStateData(trustData.hWVTStateData);
+                        NativeMethods.CRYPT_PROVIDER_DATA cryptProviderData = (NativeMethods.CRYPT_PROVIDER_DATA)Marshal.PtrToStructure(cryptProviderDataPtr, typeof(NativeMethods.CRYPT_PROVIDER_DATA));
+
+                        for (UInt32 idxSigner = 0; idxSigner < cryptProviderData.csSigners; idxSigner++)
                         {
-                            continue;
-                        }
+                            IntPtr cryptProviderSgnrPtr = NativeMethods.WTHelperGetProvSignerFromChain(cryptProviderDataPtr, idxSigner, false, 0);
+                            if (cryptProviderSgnrPtr == IntPtr.Zero)
+                                continue;
 
-                        NativeMethods.CMSG_SIGNER_INFO signerInfo = (NativeMethods.CMSG_SIGNER_INFO)Marshal.PtrToStructure(signerPtr, typeof(NativeMethods.CMSG_SIGNER_INFO));
-                        X509Certificate2 signerCertificate = null;
+                            NativeMethods.CRYPT_PROVIDER_SGNR cryptProviderSgnr = (NativeMethods.CRYPT_PROVIDER_SGNR)Marshal.PtrToStructure(cryptProviderSgnrPtr, typeof(NativeMethods.CRYPT_PROVIDER_SGNR));
+                            if (cryptProviderSgnr.psSigner == IntPtr.Zero)
+                                continue;
+                            NativeMethods.CMSG_SIGNER_INFO signer = (NativeMethods.CMSG_SIGNER_INFO)Marshal.PtrToStructure(cryptProviderSgnr.psSigner, typeof(NativeMethods.CMSG_SIGNER_INFO));
 
-                        //
-                        // Search for the signer certificate in the temporary certificate store.
-                        //
-                        {
-                            NativeMethods.CERT_INFO CertInfo = new NativeMethods.CERT_INFO()
+                            IntPtr cryptProviderCertPtr = NativeMethods.WTHelperGetProvCertFromChain(cryptProviderSgnrPtr, idxSigner);
+                            if (cryptProviderCertPtr == IntPtr.Zero)
+                                continue;
+                            NativeMethods.CRYPT_PROVIDER_CERT cryptProviderCert = (NativeMethods.CRYPT_PROVIDER_CERT)Marshal.PtrToStructure(cryptProviderCertPtr, typeof(NativeMethods.CRYPT_PROVIDER_CERT));
+                            if (cryptProviderCert.cbStruct == 0)
+                                continue;
+                            X509Certificate2 signerCertificate;
                             {
-                                dwVersion = 0,
-                                SerialNumber = signerInfo.SerialNumber,
-                                SignatureAlgorithm = new NativeMethods.CRYPT_ALGORITHM_IDENTIFIER()
-                                {
-                                    pszObjId = "",
-                                    Parameters = new NativeMethods.CRYPTOAPI_BLOB()
-                                    {
-                                        cbData = 0,
-                                        pbData = IntPtr.Zero,
-                                    }
-                                },
-                                Issuer = signerInfo.Issuer,
-                                NotBefore = new NativeMethods.FILETIME()
-                                {
-                                    DateTimeHigh = 0,
-                                    DateTimeLow = 0,
-                                },
-                                NotAfter = new NativeMethods.FILETIME()
-                                {
-                                    DateTimeHigh = 0,
-                                    DateTimeLow = 0,
-                                },
-                                Subject = new NativeMethods.CRYPTOAPI_BLOB()
-                                {
-                                    cbData = 0,
-                                    pbData = IntPtr.Zero,
-                                },
-                                SubjectPublicKeyInfo = new NativeMethods.CERT_PUBLIC_KEY_INFO()
-                                {
-                                    Algorithm = new NativeMethods.CRYPT_ALGORITHM_IDENTIFIER()
-                                    {
-                                        pszObjId = "",
-                                        Parameters = new NativeMethods.CRYPTOAPI_BLOB()
-                                        {
-                                            cbData = 0,
-                                            pbData = IntPtr.Zero,
-                                        }
-                                    },
-                                    PublicKey = new NativeMethods.CRYPT_BIT_BLOB()
-                                    {
-                                        cbData = 0,
-                                        pbData = IntPtr.Zero,
-                                        cUnusedBits = 0,
-                                    },
-                                },
-                                IssuerUniqueId = new NativeMethods.CRYPT_BIT_BLOB()
-                                {
-                                    cbData = 0,
-                                    pbData = IntPtr.Zero,
-                                    cUnusedBits = 0,
-                                },
-                                SubjectUniqueId = new NativeMethods.CRYPT_BIT_BLOB()
-                                {
-                                    cbData = 0,
-                                    pbData = IntPtr.Zero,
-                                    cUnusedBits = 0,
-                                },
-                                cExtension = 0,
-                                rgExtension = IntPtr.Zero,
-                            };
+                                NativeMethods.CERT_CONTEXT certContext = (NativeMethods.CERT_CONTEXT)Marshal.PtrToStructure(cryptProviderCert.pCert, typeof(NativeMethods.CERT_CONTEXT));
 
-                            IntPtr CertInfoPtr = IntPtr.Zero;
-                            IntPtr CertContextPtr = IntPtr.Zero;
-                            try
-                            {
-                                CertInfoPtr = Marshal.AllocHGlobal(Marshal.SizeOf(CertInfo));
-                                Marshal.StructureToPtr(CertInfo, CertInfoPtr, false);
-
-                                CertContextPtr = NativeMethods.CertFindCertificateInStore(
-                                    hCertStore,
-                                    NativeMethods.EncodingType.X509_ASN_ENCODING | NativeMethods.EncodingType.PKCS_7_ASN_ENCODING,
-                                    0,
-                                    NativeMethods.CERT_FIND_SUBJECT_CERT, // uses CERT_INFO.Issuer and CERT_INFO.SerialNumber
-                                    CertInfoPtr,
-                                    IntPtr.Zero);
-                                if (CertContextPtr == IntPtr.Zero)
-                                    throw new Win32Exception(Marshal.GetLastWin32Error());
-
-                                {
-                                    NativeMethods.CERT_CONTEXT CertContext = (NativeMethods.CERT_CONTEXT)Marshal.PtrToStructure(CertContextPtr, typeof(NativeMethods.CERT_CONTEXT));
-                                    byte[] rawData = new byte[CertContext.cbCertEncoded];
-                                    Marshal.Copy(CertContext.pbCertEncoded, rawData, 0, CertContext.cbCertEncoded);
-
-                                    signerCertificate = new X509Certificate2(rawData);
-                                }
+                                byte[] rawData = new byte[certContext.cbCertEncoded];
+                                Marshal.Copy(certContext.pbCertEncoded, rawData, 0, (int)certContext.cbCertEncoded);
+                                signerCertificate = new X509Certificate2(rawData);
                             }
-                            finally
-                            {
-                                if (CertContextPtr != IntPtr.Zero)
-                                    NativeMethods.CertFreeCertificateContext(CertContextPtr);
 
-                                if (CertInfoPtr != IntPtr.Zero)
+                            signatures.Add(
+                                new Signature()
                                 {
-                                    Marshal.FreeHGlobal(CertInfoPtr);
-                                    CertInfoPtr = IntPtr.Zero;
-                                }
-                            }
+                                    HashAlgorithmOid = signer.HashAlgorithm.pszObjId,
+                                    SignerCertificate = signerCertificate,
+                                    CounterSignatures = GetCounterSignatures(cryptProviderData, cryptProviderSgnr),
+                                }); ;
                         }
-
-                        result.Add(new Signature()
-                        {
-                            HashAlgorithmOid = signerInfo.HashAlgorithm.pszObjId,
-                            HashEncryptionAlgorithmOid = signerInfo.HashEncryptionAlgorithm.pszObjId,
-                            SignerCertificate = signerCertificate,
-                        });
                     }
                     finally
                     {
-                        Marshal.FreeHGlobal(signerPtr);
+                        trustData.dwStateAction = NativeMethods.WINTRUST_DATA_StateAction.WTD_STATEACTION_CLOSE;
+                        Marshal.StructureToPtr(trustData, trustDataPtr, false);
+                        NativeMethods.WinVerifyTrust(NativeMethods.INVALID_HANDLE_VALUE, actionIdBytesPtr, trustDataPtr);
+                    }
+                }
+            }
+            finally
+            {
+                if (actionIdBytesPtr != IntPtr.Zero)
+                    Marshal.FreeHGlobal(actionIdBytesPtr);
+
+                if (signatureSettingsPtr != IntPtr.Zero)
+                    Marshal.FreeHGlobal(signatureSettingsPtr);
+
+                if (fileInfoPtr != IntPtr.Zero)
+                    Marshal.FreeHGlobal(fileInfoPtr);
+
+                if (trustDataPtr != IntPtr.Zero)
+                    Marshal.FreeHGlobal(trustDataPtr);
+            }
+
+            return signatures;
+        }
+
+        private static List<CounterSignature> GetCounterSignatures(NativeMethods.CRYPT_PROVIDER_DATA cryptProviderData, NativeMethods.CRYPT_PROVIDER_SGNR cryptProviderSgnr)
+        {
+            List<CounterSignature> counterSignatures = new List<CounterSignature>();
+
+            var CRYPT_PROVIDER_SGNR_Size = Marshal.SizeOf(typeof(NativeMethods.CRYPT_PROVIDER_SGNR));
+            IntPtr CounterSignerPtr = cryptProviderSgnr.pasCounterSigners;
+
+            for (UInt32 idxCounterSigner=0; idxCounterSigner < cryptProviderSgnr.csCounterSigners; idxCounterSigner++)
+            {
+                NativeMethods.CRYPT_PROVIDER_SGNR counterSigner = (NativeMethods.CRYPT_PROVIDER_SGNR)Marshal.PtrToStructure(CounterSignerPtr, typeof(NativeMethods.CRYPT_PROVIDER_SGNR));
+                NativeMethods.CMSG_SIGNER_INFO signer = (NativeMethods.CMSG_SIGNER_INFO)Marshal.PtrToStructure(counterSigner.psSigner, typeof(NativeMethods.CMSG_SIGNER_INFO));
+
+                IntPtr cryptProviderCertPtr = NativeMethods.WTHelperGetProvCertFromChain(CounterSignerPtr, idxCounterSigner);
+                if (cryptProviderCertPtr != IntPtr.Zero)
+                {
+                    NativeMethods.CRYPT_PROVIDER_CERT cryptProviderCert = (NativeMethods.CRYPT_PROVIDER_CERT)Marshal.PtrToStructure(cryptProviderCertPtr, typeof(NativeMethods.CRYPT_PROVIDER_CERT));
+                    if (cryptProviderCert.cbStruct != 0)
+                    {
+                        X509Certificate2 signerCertificate;
+                        {
+                            NativeMethods.CERT_CONTEXT certContext = (NativeMethods.CERT_CONTEXT)Marshal.PtrToStructure(cryptProviderCert.pCert, typeof(NativeMethods.CERT_CONTEXT));
+
+                            byte[] rawData = new byte[certContext.cbCertEncoded];
+                            Marshal.Copy(certContext.pbCertEncoded, rawData, 0, (int)certContext.cbCertEncoded);
+                            signerCertificate = new X509Certificate2(rawData);
+                        }
+
+                        DateTime? Timestamp = null;
+                        if (counterSigner.sftVerifyAsOf.dwHighDateTime != cryptProviderData.sftSystemTime.dwHighDateTime ||
+                            counterSigner.sftVerifyAsOf.dwLowDateTime != cryptProviderData.sftSystemTime.dwLowDateTime)
+                        {
+                            long ft2 = (((long)counterSigner.sftVerifyAsOf.dwHighDateTime) << 32) | ((uint)counterSigner.sftVerifyAsOf.dwLowDateTime);
+                            Timestamp = DateTime.FromFileTimeUtc(ft2);
+                        }
+
+                        counterSignatures.Add(
+                            new CounterSignature()
+                            {
+                                HashAlgorithmOid = signer.HashAlgorithm.pszObjId,
+                                SignerCertificate = signerCertificate,
+                                Timestamp = Timestamp,
+                            });
                     }
                 }
 
-                return result;
+                CounterSignerPtr = IntPtr.Add(CounterSignerPtr, CRYPT_PROVIDER_SGNR_Size);
             }
-            finally
-            {
-                Marshal.FreeHGlobal(signerCountPtr);
-            }
+
+            return counterSignatures;
         }
-        */
-
-
-        /*
-         * Does not work. When signed with both SHA-1 and SHA-256 only the SHA-1 signature is returned.
-         *
-         * Add reference to: system.security.dll
-         * using System.Security.Cryptography.Pkcs;
-         *
-        private static SignerInfoCollection GetSignatures(IntPtr hCertStore, IntPtr hMsg)
-        {
-            UInt32 encodedMessageSize = 0;
-            IntPtr encodedMessagePtr = IntPtr.Zero;
-            try
-            {
-                if (!NativeMethods.CryptMsgGetParam(
-                    hMsg,
-                    NativeMethods.CryptMsgParamType.CMSG_ENCODED_MESSAGE,
-                    0,
-                    IntPtr.Zero,
-                    ref encodedMessageSize))
-                {
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
-                }
-
-                encodedMessagePtr = Marshal.AllocHGlobal((int)encodedMessageSize);
-
-                if (!NativeMethods.CryptMsgGetParam(
-                    hMsg,
-                    NativeMethods.CryptMsgParamType.CMSG_ENCODED_MESSAGE,
-                    0,
-                    encodedMessagePtr,
-                    ref encodedMessageSize))
-                {
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
-                }
-
-                byte[] encodedMessageBytes = new byte[encodedMessageSize];
-                Marshal.Copy(encodedMessagePtr, encodedMessageBytes, 0, (int)encodedMessageSize);
-
-                var signedCms = new SignedCms();
-                signedCms.Decode(encodedMessageBytes);
-
-                return signedCms.SignerInfos;
-            }
-            finally
-            {
-                if (encodedMessagePtr != IntPtr.Zero)
-                    Marshal.FreeHGlobal(encodedMessagePtr);
-            }
-        }
-        */
     }
 }

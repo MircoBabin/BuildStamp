@@ -31,6 +31,10 @@ namespace BuildStamp
                     command = new CommandStampFile();
                     break;
 
+                case ProgramArguments.CommandType.SignExecutable:
+                    command = new CommandSignExecutable();
+                    break;
+
                 case ProgramArguments.CommandType.OutputVersion:
                     command = new CommandOutputVersion();
                     break;

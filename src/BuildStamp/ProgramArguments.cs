@@ -7,7 +7,7 @@ namespace BuildStamp
 {
     public class ProgramArguments
     {
-        public enum CommandType { ShowHelp, StampFile, OutputVersion, OutputInstallationFiles, Unknown }
+        public enum CommandType { ShowHelp, StampFile, SignExecutable, OutputVersion, OutputInstallationFiles, Unknown }
 
         public Version Version { get; set; }
         public CommandType Command { get; set; }
@@ -19,9 +19,16 @@ namespace BuildStamp
 
         public DateTime Now { get; set; }
 
+        public string CertificatePfxFilename { get; set; }
+        public string CertificatePfxPassword { get; set; }
+
+        public string SignWithAuthenticodeTimestampUrl { get; set; }
+        public string SignWithSha256TimestampUrl { get; set; }
+
         public ProgramArguments(Assembly main, string[] args, Languages languages)
         {
             /* stamp
+             * sign
              * output-version
              * output-installationfilenames
              * --launchdebugger
@@ -29,6 +36,10 @@ namespace BuildStamp
              * --language "pascal"
              * --datetime "1975-09-12T23:30:00+02:00"
              * --outputfilename "c:\projects\...\version.pas"
+             * --certificate "codesign.pfx"
+             * --certficate-password "secret"
+             * --sign-with-sha1-timestamp-url "http://timestamp.comodoca.com"
+             * --sign-with-sha256-timestamp-url "http://timestamp.comodoca.com/?td=sha256"
              */
 
             Languages = languages;
@@ -39,6 +50,12 @@ namespace BuildStamp
             FilenameToStamp = string.Empty;
             FilenameToStampLanguage = null;
             FilenameToOutput = string.Empty;
+
+            CertificatePfxFilename = string.Empty;
+            CertificatePfxPassword = string.Empty;
+
+            SignWithAuthenticodeTimestampUrl = string.Empty;
+            SignWithSha256TimestampUrl = string.Empty;
 
             if (args.Length == 0)
             {
@@ -53,6 +70,10 @@ namespace BuildStamp
                 if (cmdname == "stamp")
                 {
                     Command = CommandType.StampFile;
+                }
+                else if (cmdname == "sign")
+                {
+                    Command = CommandType.SignExecutable;
                 }
                 else if (cmdname == "output-version")
                 {
@@ -101,6 +122,26 @@ namespace BuildStamp
                             throw new Exception("--datetime \"" + cmdvalue + "\" is not valid ISO-8601. " + ex.Message);
                         }
                     }
+                }
+                else if (cmdname == "--certificate")
+                {
+                    i++;
+                    if (i < args.Length) CertificatePfxFilename = args[i].Trim();
+                }
+                else if (cmdname == "--certificate-password")
+                {
+                    i++;
+                    if (i < args.Length) CertificatePfxPassword = args[i].Trim();
+                }
+                else if (cmdname == "--sign-with-authenticode-timestamp-url")
+                {
+                    i++;
+                    if (i < args.Length) SignWithAuthenticodeTimestampUrl = args[i].Trim();
+                }
+                else if (cmdname == "--sign-with-rfc3161-sha256-timestamp-url")
+                {
+                    i++;
+                    if (i < args.Length) SignWithSha256TimestampUrl = args[i].Trim();
                 }
                 else if (cmdname == "--launchdebugger")
                 {

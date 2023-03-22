@@ -72,6 +72,16 @@ namespace BuildStamp
             output.WriteOutputLine("Commit the initial <source-filename> and afterwards .gitignore it.");
 
             output.WriteOutputLine();
+
+            output.WriteOutputLine("Syntax: BuildStamp.exe sign --filename <filename.exe>");
+            output.WriteOutputLine("                            --certificate <code-signing-certificate.pfx>");
+            output.WriteOutputLine("                            --certificate-password <password for code-signing-certificate.pfx>");
+            output.WriteOutputLine("                            {--sign-with-authenticode-timestamp-url <url>} like http://timestamp.digicert.com");
+            output.WriteOutputLine("                            {--sign-with-rfc3161-sha256-timestamp-url <url>} like http://timestamp.digicert.com");
+            output.WriteOutputLine("                            {--launchdebugger}");
+
+
+            output.WriteOutputLine();
             output.WriteOutputLine("--- LICENSE ---");
             output.WriteOutputLine("BuildStamp");
             output.WriteOutputLine("MIT license");
