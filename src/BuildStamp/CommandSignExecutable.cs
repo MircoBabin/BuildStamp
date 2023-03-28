@@ -8,6 +8,7 @@ namespace BuildStamp
     {
         public const string Sha1Oid = "1.3.14.3.2.26";
         public const string Sha256Oid = "2.16.840.1.101.3.4.2.1";
+        public const string Sha384Oid = "2.16.840.1.101.3.4.2.2";
 
         public ProgramExitCode Run(ProgramOutput output, ProgramArguments args)
         {
@@ -21,22 +22,111 @@ namespace BuildStamp
 
             WaitForFileNotInUse(args.FilenameToStamp);
 
-            output.WriteOutputLine("Code signing certificate: \"" + args.CertificatePfxFilename + "\"");
-            if (!File.Exists(args.FilenameToStamp))
-            {
-                output.WriteOutputLine("Certificate file does not exist.");
-                return ProgramExitCode.FileNotFound;
-            }
-
             X509Certificate2 signingCertificate;
-            try
+            if (!string.IsNullOrEmpty(args.CertificatePfxFilename))
             {
-                signingCertificate = new X509Certificate2(args.CertificatePfxFilename, args.CertificatePfxPassword);
+                if (!string.IsNullOrEmpty(args.KeePassCertificateTitle))
+                {
+                    output.WriteOutputLine("Use --certificate OR --keepass-certificate-title, but not both.");
+                    return ProgramExitCode.CertificateError;
+                }
+
+                output.WriteOutputLine("Code signing certificate: \"" + args.CertificatePfxFilename + "\"");
+                if (!File.Exists(args.FilenameToStamp))
+                {
+                    output.WriteOutputLine("Certificate file does not exist.");
+                    return ProgramExitCode.CertificateError;
+                }
+
+                try
+                {
+                    signingCertificate = new X509Certificate2(args.CertificatePfxFilename, args.CertificatePfxPassword);
+                }
+                catch (Exception ex)
+                {
+                    output.WriteOutputLine("Error loading ertificate file. Wrong --certificate-password ?");
+                    output.WriteOutputLine(ex.Message);
+                    return ProgramExitCode.CertificateError;
+                }
             }
-            catch (Exception ex)
+            else if (!string.IsNullOrEmpty(args.KeePassCertificateTitle))
             {
-                output.WriteOutputLine("Error loading ertificate file. Wrong --certificate-password ?");
-                output.WriteOutputLine(ex.Message);
+                string dll = Path.Combine(Path.GetFullPath(args.KeePassCommanderPath), "KeePassCommandDll.dll");
+                if (!File.Exists(dll))
+                {
+                    output.WriteOutputLine("KeePassCommander not found:");
+                    output.WriteOutputLine(dll);
+                    return ProgramExitCode.CertificateError;
+                }
+
+                KeePassCommand.KeePassEntry.Initialize(dll);
+                KeePassCommand.KeePassEntry entry = null;
+
+                string[] fieldnames = null;
+                if (!string.IsNullOrEmpty(args.KeePassCertificatePassword))
+                    fieldnames = new string[1] { args.KeePassCertificatePassword };
+
+                try
+                {
+                    entry = KeePassCommand.KeePassEntry.getfirst(args.KeePassCertificateTitle,
+                        fieldnames,
+                        new string[] { args.KeePassCertificateAttachment });
+
+                    if (entry != null && entry.Title != args.KeePassCertificateTitle)
+                        entry = null;
+                }
+                catch (Exception ex)
+                {
+                    output.WriteOutputLine(ex.Message);
+                    output.WriteOutputLine();
+                }
+
+                if (entry == null)
+                {
+                    output.WriteOutputLine("Error retrieving certificate from KeePass.");
+                    output.WriteOutputLine("1) KeePass is closed or locked.");
+                    output.WriteOutputLine("2) --keepass-certificate-title does not exist");
+                    return ProgramExitCode.CertificateError;
+                }
+
+                if (entry.Attachments.Count != 1)
+                {
+                    output.WriteOutputLine("Error retrieving certificate from KeePass.");
+                    output.WriteOutputLine("1) --keepass-certificate-attachment does not exist");
+                    return ProgramExitCode.CertificateError;
+                }
+
+                string password;
+                if (!string.IsNullOrEmpty(args.KeePassCertificatePassword))
+                { 
+                    if (entry.Fields.Count != 1)
+                    {
+                        output.WriteOutputLine("Error retrieving certificate from KeePass.");
+                        output.WriteOutputLine("1) --keepass-certificate-password does not exist");
+                        return ProgramExitCode.CertificateError;
+                    }
+                    password = entry.Fields[0].Value;
+                }
+                else
+                {
+                    password = entry.Password;
+                }
+
+                try
+                {
+                    signingCertificate = new X509Certificate2(entry.Attachments[0].Value, password);
+                }
+                catch (Exception ex)
+                {
+                    output.WriteOutputLine("Error loading certificate retrieved from KeePass.");
+                    output.WriteOutputLine("Wrong --keepass-certificate-password ?");
+                    output.WriteOutputLine(ex.Message);
+                    return ProgramExitCode.CertificateError;
+                }
+            }
+            else
+            {
+                output.WriteOutputLine("Use --certificate OR --keepass-certificate-title.");
                 return ProgramExitCode.CertificateError;
             }
 
@@ -145,6 +235,9 @@ namespace BuildStamp
 
             if (inputOid == Sha256Oid)
                 return "Sha-256";
+
+            if (inputOid == Sha384Oid)
+                return "Sha-384";
 
             return inputOid;
         }

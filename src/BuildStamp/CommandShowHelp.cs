@@ -12,10 +12,21 @@ namespace BuildStamp
 
             output.WriteOutputLine();
 
-            output.WriteOutputLine("BuildStamp is a compilation tool. It stamps the compilation date/time into a source file.");
-            output.WriteOutputLine("Use BuildStamp in the Pre-build event to inject compilation date/time.");
+            output.WriteOutputLine("BuildStamp is a compilation tool.");
+            output.WriteOutputLine("It stamps the compilation date/time into a source file, using the Pre-build event.");
+            output.WriteOutputLine("It can also digitally sign any executable. The codesign certificate can be on disk or in KeePass.");
 
             output.WriteOutputLine();
+            output.WriteOutputLine();
+            output.WriteOutputLine();
+
+            output.WriteOutputLine("----------------------------------------------------");
+            output.WriteOutputLine("----------------------------------------------------");
+            output.WriteOutputLine("---                                              ---");
+            output.WriteOutputLine("--- Stamp compilation date/time into source file ---");
+            output.WriteOutputLine("---                                              ---");
+            output.WriteOutputLine("----------------------------------------------------");
+            output.WriteOutputLine("----------------------------------------------------");
 
             output.WriteOutputLine("Syntax: BuildStamp.exe stamp --filename <source-filename> --language <language>");
             output.WriteOutputLine("                             {--outputfilename <output-filename>}");
@@ -69,20 +80,46 @@ namespace BuildStamp
             output.WriteOutputLine("It is recommended for the <source-filename> to only contain BuildStamp metadata.");
             output.WriteOutputLine("And no other metadata like versionnumber, buildnumber, copyright, etc."); 
             output.WriteOutputLine("Because adding other metadata does not play well with version control (Git).");
-            output.WriteOutputLine("Commit the initial <source-filename> and afterwards .gitignore it.");
 
             output.WriteOutputLine();
+            output.WriteOutputLine();
+            output.WriteOutputLine();
+            output.WriteOutputLine("---------------------------------");
+            output.WriteOutputLine("---------------------------------");
+            output.WriteOutputLine("---                           ---");
+            output.WriteOutputLine("--- Digitally sign executable ---");
+            output.WriteOutputLine("---                           ---");
+            output.WriteOutputLine("---------------------------------");
+            output.WriteOutputLine("---------------------------------");
 
             output.WriteOutputLine("Syntax: BuildStamp.exe sign --filename <filename.exe>");
-            output.WriteOutputLine("                            --certificate <code-signing-certificate.pfx>");
-            output.WriteOutputLine("                            --certificate-password <password for code-signing-certificate.pfx>");
+            output.WriteOutputLine("                            {--certificate <code-signing-certificate.pfx>}");
+            output.WriteOutputLine("                            {--certificate-password <password for code-signing-certificate.pfx>}");
+            output.WriteOutputLine("                            {--keepasscommander-path <path>} like c:\\KeePass\\Plugins");
+            output.WriteOutputLine("                            {--keepass-certificate-title <title>} like \"My Code Signing Certificate\"");
+            output.WriteOutputLine("                            {--keepass-certificate-attachment <attachmentname>} like \"certificate.p12\"");
+            output.WriteOutputLine("                            {--keepass-certificate-password <fieldname>} like \"Certificate Password\". When omitted the default password field is used.");
             output.WriteOutputLine("                            {--sign-with-authenticode-timestamp-url <url>} like http://timestamp.digicert.com");
-            output.WriteOutputLine("                            {--sign-with-rfc3161-sha256-timestamp-url <url>} like http://timestamp.digicert.com");
+            output.WriteOutputLine("                            {--sign-with-sha256-rfc3161-timestamp-url <url>} like http://timestamp.digicert.com");
             output.WriteOutputLine("                            {--launchdebugger}");
-
+            output.WriteOutputLine();
+            output.WriteOutputLine("Digitally signs <filename.exe>.");
+            output.WriteOutputLine();
+            output.WriteOutputLine("With --certificate and --certificate-password the certificate is read from a file on disk.");
+            output.WriteOutputLine("With --keepasscommander-path and --keepass-certificate-... the certificate is retrieved from the KeePass password store. The KeePass plugin KeepassCommander https://github.com/MircoBabin/KeePassCommander is used for retrieval.");
+            output.WriteOutputLine("Attention: --keepass-certificate-attachment references an attachmentname in the KeePass entry with title <--keepass-certificate-title>.");
+            output.WriteOutputLine("Attention: --keepass-certificate-password references a fieldname in the KeePass entry with title <--keepass-certificate-title>, and must not provide the real password.");
 
             output.WriteOutputLine();
-            output.WriteOutputLine("--- LICENSE ---");
+            output.WriteOutputLine();
+            output.WriteOutputLine();
+            output.WriteOutputLine("---------------");
+            output.WriteOutputLine("---------------");
+            output.WriteOutputLine("---         ---");
+            output.WriteOutputLine("--- License ---");
+            output.WriteOutputLine("---         ---");
+            output.WriteOutputLine("---------------");
+            output.WriteOutputLine("---------------");
             output.WriteOutputLine("BuildStamp");
             output.WriteOutputLine("MIT license");
             output.WriteOutputLine();

@@ -319,6 +319,10 @@ namespace BuildStamp
         public static void Sign(string exeFilename, X509Certificate2 signingCertificate, string timestampUrl)
         {
             //timestampUrl must be Authenticode timestamp server like http://timestamp.digicert.com
+            //Almost all timestamp servers return at least a sha-256 timestamp. So digitally signing for Windows/XP is not really supported anymore.
+
+            //Warning: "http://timestamp.digicert.com?alg=sha1" gets mangled internally to "http://timestamp.digicert.com%3Falg=authenticode/".
+            //         Use "http://timestamp.digicert.com/?alg=sha1"
 
             var CryptuiWizDigitalSignInfo = new CryptuiWizDigitalSignInfo(exeFilename, signingCertificate, timestampUrl);
             try

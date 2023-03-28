@@ -51,6 +51,7 @@
     <Compile Include="CommandShowHelp.cs" />
     <Compile Include="ICommand.cs" />
     <Compile Include="ILanguage.cs" />
+    <Compile Include="KeePassEntry.cs" />
     <Compile Include="LanguageCSharp.cs" />
     <Compile Include="LanguagePascal.cs" />
     <Compile Include="Languages.cs" />

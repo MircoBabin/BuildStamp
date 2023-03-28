@@ -22,6 +22,11 @@ namespace BuildStamp
         public string CertificatePfxFilename { get; set; }
         public string CertificatePfxPassword { get; set; }
 
+        public string KeePassCommanderPath { get; set; }
+        public string KeePassCertificateTitle { get; set; }
+        public string KeePassCertificateAttachment { get; set; }
+        public string KeePassCertificatePassword { get; set; }
+
         public string SignWithAuthenticodeTimestampUrl { get; set; }
         public string SignWithSha256TimestampUrl { get; set; }
 
@@ -39,7 +44,11 @@ namespace BuildStamp
              * --certificate "codesign.pfx"
              * --certficate-password "secret"
              * --sign-with-sha1-timestamp-url "http://timestamp.comodoca.com"
-             * --sign-with-sha256-timestamp-url "http://timestamp.comodoca.com/?td=sha256"
+             * --sign-with-sha256-rfc3161-timestamp-url "http://timestamp.comodoca.com/?td=sha256"
+             * --keepasscommander-path "c:\KeePass\Plugins"
+             * --keepass-certificate-title "title"
+             * --keepass-certificate-attachment "name"
+             * --keepass-certificate-password "name"
              */
 
             Languages = languages;
@@ -53,6 +62,11 @@ namespace BuildStamp
 
             CertificatePfxFilename = string.Empty;
             CertificatePfxPassword = string.Empty;
+
+            KeePassCommanderPath = string.Empty;
+            KeePassCertificateTitle = string.Empty;
+            KeePassCertificateAttachment = string.Empty;
+            KeePassCertificatePassword = string.Empty;
 
             SignWithAuthenticodeTimestampUrl = string.Empty;
             SignWithSha256TimestampUrl = string.Empty;
@@ -133,12 +147,32 @@ namespace BuildStamp
                     i++;
                     if (i < args.Length) CertificatePfxPassword = args[i].Trim();
                 }
+                else if (cmdname == "--keepasscommander-path")
+                {
+                    i++;
+                    if (i < args.Length) KeePassCommanderPath = args[i].Trim();
+                }
+                else if (cmdname == "--keepass-certificate-title")
+                {
+                    i++;
+                    if (i < args.Length) KeePassCertificateTitle = args[i];
+                }
+                else if (cmdname == "--keepass-certificate-attachment")
+                {
+                    i++;
+                    if (i < args.Length) KeePassCertificateAttachment = args[i];
+                }
+                else if (cmdname == "--keepass-certificate-password")
+                {
+                    i++;
+                    if (i < args.Length) KeePassCertificatePassword = args[i];
+                }
                 else if (cmdname == "--sign-with-authenticode-timestamp-url")
                 {
                     i++;
                     if (i < args.Length) SignWithAuthenticodeTimestampUrl = args[i].Trim();
                 }
-                else if (cmdname == "--sign-with-rfc3161-sha256-timestamp-url")
+                else if (cmdname == "--sign-with-sha256-rfc3161-timestamp-url")
                 {
                     i++;
                     if (i < args.Length) SignWithSha256TimestampUrl = args[i].Trim();
