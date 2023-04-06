@@ -72,8 +72,39 @@ namespace BuildStamp
                         fieldnames,
                         new string[] { args.KeePassCertificateAttachment });
 
-                    if (entry != null && entry.Title != args.KeePassCertificateTitle)
-                        entry = null;
+                    if (entry != null)
+                    {
+                        if (entry.CommunicationVia != null && entry.CommunicationVia.Count > 0)
+                        {
+                            var via = entry.CommunicationVia[0];
+                            Console.WriteLine();
+                            Console.WriteLine("Communicated with KeePass via " + via.SendVia.ToString() + ".");
+
+                            if (via.XmlConfigFilename != null)
+                            {
+                                string config = Path.GetFullPath(via.XmlConfigFilename);
+                                Console.WriteLine("Used configuration: " + config);
+                            }
+
+                            if (via.SendVia == KeePassCommand.CommunicationType.FileSystem)
+                            {
+                                Console.WriteLine("Used filesystem: " + via.FileSystemDirectory);
+                            }
+
+                            Console.WriteLine();
+                        }
+
+                        if (entry.Title != args.KeePassCertificateTitle)
+                        {
+                            Console.WriteLine("Could not retrieve KeePass entry.");
+                            Console.WriteLine("When using filesystem communication, has KeePass entry \"KeePassCommander.FileSystem ...\"");
+                            Console.WriteLine("the following line in the notes section:");
+                            Console.WriteLine("KeePassCommanderListAddItem=" + args.KeePassCertificateTitle);
+                            Console.WriteLine();
+
+                            entry = null;
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -85,7 +116,7 @@ namespace BuildStamp
                 {
                     output.WriteOutputLine("Error retrieving certificate from KeePass.");
                     output.WriteOutputLine("1) KeePass is closed or locked.");
-                    output.WriteOutputLine("2) --keepass-certificate-title does not exist");
+                    output.WriteOutputLine("2) --keepass-certificate-title \"" + args.KeePassCertificateTitle + "\" does not exist or is not allowed to be queried.");
                     return ProgramExitCode.CertificateError;
                 }
 
