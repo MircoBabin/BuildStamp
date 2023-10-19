@@ -49,6 +49,8 @@ The commandline can become long and unworkable. Therefore it is recommended to c
 
 ```
 @echo off
+    setlocal
+
     set BuildStampCmdLine=sign
     set BuildStampCmdLine=%BuildStampCmdLine% --filename "myexecutable.exe"
     set BuildStampCmdLine=%BuildStampCmdLine% --keepasscommander-path "C:\KeePass\Plugins"
@@ -64,6 +66,8 @@ Or if the codesign certificate is on disk and not in KeePass:
 
 ```
 @echo off
+    setlocal
+
     set BuildStampCmdLine=sign
     set BuildStampCmdLine=%BuildStampCmdLine% --filename "myexecutable.exe"
     set BuildStampCmdLine=%BuildStampCmdLine% --certificate "c:\certificates\codesign.p12"
