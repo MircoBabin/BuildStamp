@@ -7,14 +7,16 @@ namespace BuildStamp
 {
     public class ProgramArguments
     {
-        public enum CommandType { ShowHelp, StampFile, SignExecutable, OutputVersion, OutputInstallationFiles, Unknown }
+        public enum CommandType { ShowHelp, StampFile, SignExecutable, StampVersionInfo, OutputVersion, OutputInstallationFiles, Unknown }
 
         public Version Version { get; set; }
         public CommandType Command { get; set; }
         public Languages Languages { get; set; }
 
+        public string VersionFilename { get; set; }
+
         public string FilenameToStamp { get; set; }
-        public ILanguage FilenameToStampLanguage { get; }
+        public ILanguage ProgrammingLanguage { get; }
         public string FilenameToOutput { get; set; }
 
         public DateTime Now { get; set; }
@@ -56,8 +58,9 @@ namespace BuildStamp
             Now = DateTime.Now;
 
             Command = CommandType.Unknown;
+            VersionFilename = string.Empty;
             FilenameToStamp = string.Empty;
-            FilenameToStampLanguage = null;
+            ProgrammingLanguage = null;
             FilenameToOutput = string.Empty;
 
             CertificatePfxFilename = string.Empty;
@@ -89,6 +92,10 @@ namespace BuildStamp
                 {
                     Command = CommandType.SignExecutable;
                 }
+                else if (cmdname == "stamp-versioninfo")
+                {
+                    Command = CommandType.StampVersionInfo;
+                }
                 else if (cmdname == "output-version")
                 {
                     Command = CommandType.OutputVersion;
@@ -96,6 +103,11 @@ namespace BuildStamp
                 else if (cmdname == "output-installationfilenames")
                 {
                     Command = CommandType.OutputInstallationFiles;
+                }
+                else if (cmdname == "--versionfilename")
+                {
+                    i++;
+                    if (i < args.Length) VersionFilename = args[i].Trim();
                 }
                 else if (cmdname == "--filename")
                 {
@@ -110,7 +122,7 @@ namespace BuildStamp
                 else if (cmdname == "--language")
                 {
                     i++;
-                    if (i < args.Length) FilenameToStampLanguage = languages.getForName(args[i]);
+                    if (i < args.Length) ProgrammingLanguage = languages.getForName(args[i]);
                 }
                 else if (cmdname == "--datetime")
                 {
@@ -185,9 +197,12 @@ namespace BuildStamp
                 i++;
             }
 
-            if (Command == CommandType.StampFile)
+            switch (Command)
             {
-                if (string.IsNullOrEmpty(FilenameToOutput)) FilenameToOutput = FilenameToStamp;
+                case CommandType.StampFile:
+                case CommandType.StampVersionInfo:
+                    if (string.IsNullOrEmpty(FilenameToOutput)) FilenameToOutput = FilenameToStamp;
+                    break;
             }
         }
     }

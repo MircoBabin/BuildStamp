@@ -1,5 +1,10 @@
 # BuildStamp changelog
 
+## Version 2.2
+Release date: 22 february 2024
+
+* add: "stamp-versioninfo" command for adjusting VersionInfo.rc file.
+
 ## Version 2.1
 Release date: 6 april 2023
 

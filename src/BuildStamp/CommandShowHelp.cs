@@ -81,6 +81,77 @@ namespace BuildStamp
             output.WriteOutputLine("And no other metadata like versionnumber, buildnumber, copyright, etc."); 
             output.WriteOutputLine("Because adding other metadata does not play well with version control (Git).");
 
+            output.WriteOutputLine("----------------------------------------------------");
+            output.WriteOutputLine("----------------------------------------------------");
+            output.WriteOutputLine("---                                              ---");
+            output.WriteOutputLine("--- Stamp VersionInfo resource file (.rc)        ---");
+            output.WriteOutputLine("---                                              ---");
+            output.WriteOutputLine("----------------------------------------------------");
+            output.WriteOutputLine("----------------------------------------------------");
+
+            output.WriteOutputLine("Syntax: BuildStamp.exe stamp-versioninfo --versionfilename <versionSource-filename> --language <language>");
+            output.WriteOutputLine("                             --filename <ResourceCompiler-filename.rc>");
+            output.WriteOutputLine("                             {--outputfilename <output-filename>}");
+            output.WriteOutputLine("                             {--launchdebugger}");
+
+            output.WriteOutputLine("- With --language the programming language of <versionSource-filename> is specified.");
+
+            output.WriteOutputLine("- When --outputfilename is ommitted, the <ResourceCompiler-filename.rc> will be overwritten.");
+            output.WriteOutputLine("- When the debug switch --launchdebugger is encountered, a request to launch the debugger is started.");
+
+            output.WriteOutputLine();
+
+            output.WriteOutputLine("<versionSource-filename> has to contain the version string between 2 markers. E.g. for Pascal source:");
+            output.WriteOutputLine("unit Version;");
+            output.WriteOutputLine("interface");
+            output.WriteOutputLine("const VersionString =");
+            output.WriteOutputLine("    {<BUILDSTAMP:BEGINVERSION>}");
+            output.WriteOutputLine("    '4.076'");
+            output.WriteOutputLine("    {<BUILDSTAMP:ENDVERSION>};");
+            output.WriteOutputLine("implementation");
+            output.WriteOutputLine("end.");
+
+            output.WriteOutputLine();
+
+            output.WriteOutputLine("<ResourceCompiler-filename.rc> has to contain the version number.");
+            output.WriteOutputLine("// <BUILDSTAMP:BEGINSTAMP>");
+            output.WriteOutputLine("    Inside <BUILDSTAMP:VERSION_4PARTS_COMMA_SEPARATED> is replaced with \"major,minor,patch,build\".");
+            output.WriteOutputLine("    Inside <BUILDSTAMP:VERSION_4PARTS_POINT_SEPARATED> is replaced with \"major.minor.patch.build\".");
+            output.WriteOutputLine("    Inside <BUILDSTAMP:VERSION_FULL> is replaced with the full version inside <versionSource-filename>.");
+            output.WriteOutputLine("// <BUILDSTAMP:ENDSTAMP>");
+
+            output.WriteOutputLine();
+
+            output.WriteOutputLine("e.g. for Pascal resource file: BuildStamp.exe stamp-versioninfo --versionfilename c:\\...\\Version.pas --language pascal --filename c:\\...\\VersionInfo.rc");
+            output.WriteOutputLine("VersionInfo.rc contents:");
+            output.WriteOutputLine("// <BUILDSTAMP:BEGINSTAMP>");
+            output.WriteOutputLine("1 VERSIONINFO");
+            output.WriteOutputLine("FILEVERSION <BUILDSTAMP:VERSION_4PARTS_COMMA_SEPARATED>");
+            output.WriteOutputLine("PRODUCTVERSION <BUILDSTAMP:VERSION_4PARTS_COMMA_SEPARATED>");
+            output.WriteOutputLine("FILEOS 0x4");
+            output.WriteOutputLine("FILETYPE 0x1");
+            output.WriteOutputLine("{");
+            output.WriteOutputLine("BLOCK \"StringFileInfo\"");
+            output.WriteOutputLine("{");
+            output.WriteOutputLine("    BLOCK \"040904E4\"");
+            output.WriteOutputLine("    {");
+            output.WriteOutputLine("        VALUE L\"CompanyName\", L\"My Company\\000\"");
+            output.WriteOutputLine("        VALUE L\"FileDescription\", L\"My Program\\000\"");
+            output.WriteOutputLine("        VALUE L\"FileVersion\", L\"<BUILDSTAMP:VERSION_4PARTS_POINT_SEPARATED>>\\000\"");
+            output.WriteOutputLine("        VALUE L\"LegalCopyright\", L\"(c) My Company\\000\"");
+            output.WriteOutputLine("        VALUE L\"ProductName\", L\"My Program\\000\"");
+            output.WriteOutputLine("        VALUE L\"ProductVersion\", L\"<BUILDSTAMP:VERSION_FULL>\\000\"");
+            output.WriteOutputLine("        VALUE L\"ProgramID\", L\"MyProgram\\000\" // Delphi specific. Must be the projectname, e.g. MyProgram.dproj");
+            output.WriteOutputLine("    }");
+            output.WriteOutputLine("}");
+            output.WriteOutputLine("BLOCK \"VarFileInfo\"");
+            output.WriteOutputLine("{");
+            output.WriteOutputLine("    VALUE \"Translation\", 0x0409 0x04E4");
+            output.WriteOutputLine("}");
+            output.WriteOutputLine("}");
+            output.WriteOutputLine("// <BUILDSTAMP:ENDSTAMP>");
+
+
             output.WriteOutputLine();
             output.WriteOutputLine();
             output.WriteOutputLine();

@@ -1,0 +1,60 @@
+// TEST for Delphi
+
+// <BUILDSTAMP:BEGINSTAMP>
+/*
+<BUILDSTAMP:BEGINTEMPLATE>
+1 VERSIONINFO
+FILEVERSION <BUILDSTAMP:VERSION_4PARTS_COMMA_SEPARATED>
+PRODUCTVERSION <BUILDSTAMP:VERSION_4PARTS_COMMA_SEPARATED>
+FILEOS 0x4
+FILETYPE 0x1
+{
+BLOCK "StringFileInfo"
+{
+    BLOCK "040904E4"
+    {
+        VALUE L"CompanyName", L"My Company\000"
+        VALUE L"FileDescription", L"My Program\000"
+        VALUE L"FileVersion", L"<BUILDSTAMP:VERSION_4PARTS_POINT_SEPARATED>\000"
+        VALUE L"LegalCopyright", L"(c) My Company\000"
+        VALUE L"ProductName", L"My Program\000"
+        VALUE L"ProductVersion", L"<BUILDSTAMP:VERSION_FULL>\000"
+        VALUE L"ProgramID", L"MyProgram\000"
+    }
+}
+
+BLOCK "VarFileInfo"
+{
+    VALUE "Translation", 0x0409 0x04E4
+}
+}
+<BUILDSTAMP:ENDTEMPLATE>
+*/
+1 VERSIONINFO
+FILEVERSION 4,76,0,0
+PRODUCTVERSION 4,76,0,0
+FILEOS 0x4
+FILETYPE 0x1
+{
+BLOCK "StringFileInfo"
+{
+    BLOCK "040904E4"
+    {
+        VALUE L"CompanyName", L"My Company\000"
+        VALUE L"FileDescription", L"My Program\000"
+        VALUE L"FileVersion", L"4.76.0.0\000"
+        VALUE L"LegalCopyright", L"(c) My Company\000"
+        VALUE L"ProductName", L"My Program\000"
+        VALUE L"ProductVersion", L"4.076\000"
+        VALUE L"ProgramID", L"MyProgram\000"
+    }
+}
+
+BLOCK "VarFileInfo"
+{
+    VALUE "Translation", 0x0409 0x04E4
+}
+}
+// <BUILDSTAMP:ENDSTAMP>
+
+// The End

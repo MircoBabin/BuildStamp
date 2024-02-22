@@ -2,7 +2,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/MircoBabin/BuildStamp/blob/master/LICENSE.md)
 
 # BuildStamp
-BuildStamp is a compilation tool. It stamps the compilation date/time into a source file. Use BuildStamp in the Pre-build event to inject compilation date/time. It can also digitally sign any executable. The codesign certificate can be on disk or in [KeePass](https://keepass.info/ "KeePass").
+BuildStamp is a compilation tool. Use BuildStamp in the Pre-build event to inject compilation date/time and adjust the versionumber in the VersionInfo resource file.
+
+- It stamps the compilation date/time into a source file
+- It updates the VersionInfo.rc resource file with a versionumber listed in a sourcefile.
+- It can also digitally sign any executable. The codesign certificate can be on disk or in [KeePass](https://keepass.info/ "KeePass").
 
 # Download binary
 For Windows (.NET framework 4), [the latest version can be found here](https://github.com/MircoBabin/BuildStamp/releases/latest "Latest Version").
@@ -19,7 +23,7 @@ The minimum .NET framework required is 4.0.
 Execute **BuildStamp.exe** without parameters to view the help.
 
 ```
-BuildStamp version 2.0
+BuildStamp version 2.2
 https://github.com/MircoBabin/BuildStamp - MIT license
 
 BuildStamp is a compilation tool.
@@ -69,6 +73,66 @@ end.
 It is recommended for the <source-filename> to only contain BuildStamp metadata.
 And no other metadata like versionnumber, buildnumber, copyright, etc.
 Because adding other metadata does not play well with version control (Git).
+----------------------------------------------------
+----------------------------------------------------
+---                                              ---
+--- Stamp VersionInfo resource file (.rc)        ---
+---                                              ---
+----------------------------------------------------
+----------------------------------------------------
+Syntax: BuildStamp.exe stamp-versioninfo --versionfilename <versionSource-filename> --language <language>
+                             --filename <ResourceCompiler-filename.rc>
+                             {--outputfilename <output-filename>}
+                             {--launchdebugger}
+- With --language the programming language of <versionSource-filename> is specified.
+- When --outputfilename is ommitted, the <ResourceCompiler-filename.rc> will be overwritten.
+- When the debug switch --launchdebugger is encountered, a request to launch the debugger is started.
+
+<versionSource-filename> has to contain the version string between 2 markers. E.g. for Pascal source:
+unit Version;
+interface
+const VersionString =
+    {<BUILDSTAMP:BEGINVERSION>}
+    '4.076'
+    {<BUILDSTAMP:ENDVERSION>};
+implementation
+end.
+
+<ResourceCompiler-filename.rc> has to contain the version number.
+// <BUILDSTAMP:BEGINSTAMP>
+    Inside <BUILDSTAMP:VERSION_4PARTS_COMMA_SEPARATED> is replaced with "major,minor,patch,build".
+    Inside <BUILDSTAMP:VERSION_4PARTS_POINT_SEPARATED> is replaced with "major.minor.patch.build".
+    Inside <BUILDSTAMP:VERSION_FULL> is replaced with the full version inside <versionSource-filename>.
+// <BUILDSTAMP:ENDSTAMP>
+
+e.g. for Pascal resource file: BuildStamp.exe stamp-versioninfo --versionfilename c:\...\Version.pas --language pascal --filename c:\...\VersionInfo.rc
+VersionInfo.rc contents:
+// <BUILDSTAMP:BEGINSTAMP>
+1 VERSIONINFO
+FILEVERSION <BUILDSTAMP:VERSION_4PARTS_COMMA_SEPARATED>
+PRODUCTVERSION <BUILDSTAMP:VERSION_4PARTS_COMMA_SEPARATED>
+FILEOS 0x4
+FILETYPE 0x1
+{
+BLOCK "StringFileInfo"
+{
+    BLOCK "040904E4"
+    {
+        VALUE L"CompanyName", L"My Company\000"
+        VALUE L"FileDescription", L"My Program\000"
+        VALUE L"FileVersion", L"<BUILDSTAMP:VERSION_4PARTS_POINT_SEPARATED>>\000"
+        VALUE L"LegalCopyright", L"(c) My Company\000"
+        VALUE L"ProductName", L"My Program\000"
+        VALUE L"ProductVersion", L"<BUILDSTAMP:VERSION_FULL>\000"
+        VALUE L"ProgramID", L"MyProgram\000" // Delphi specific. Must be the projectname, e.g. MyProgram.dproj
+    }
+}
+BLOCK "VarFileInfo"
+{
+    VALUE "Translation", 0x0409 0x04E4
+}
+}
+// <BUILDSTAMP:ENDSTAMP>
 
 
 
@@ -140,9 +204,10 @@ OTHER DEALINGS IN THE SOFTWARE.
 - [Digitally sign documentation](docs/DigitallySign.md "Digitally sign documentation")
 
 # Why
-Delphi doesn't have a good way to embed the compilation date/time into the executable. There is a solution reading the linker timestamp from the PE Header of the executable. But that PE Header solution is too complex and low-level in my opinion.
+Delphi doesn't have a good way to embed the compilation date/time into the executable. There is a solution reading the linker timestamp from the PE Header of the executable. But that PE Header solution is too complex and low-level in my opinion. 
+Delphi also lacks updating the Version Info resource in a usable way, when the versionnumber is already present in a sourcefile.
 
-So I wrote BuildStamp for injecting the compilation date/time via Pre-build event into a source file. The modified source file is then compiled into the executable.
+So I wrote BuildStamp for injecting the compilation date/time and adjusting the Version Info via Pre-build event. The modified source file is then compiled into the executable.
 
 The Microsoft provided [signtool.exe](https://learn.microsoft.com/en-us/windows/win32/seccrypto/signtool "signtool.exe") can only be officially installed with the "Microsoft Windows Software Development Kit (SDK)". 
 I wanted a standalone executable that can be distributed standalone. And I wanted the ability to store the code signing certificate in [KeePass](https://keepass.info/ "KeePass"). That's why I added the "sign" command.
