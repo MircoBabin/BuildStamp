@@ -32,7 +32,7 @@ namespace BuildStamp
                 }
 
                 output.WriteOutputLine("Code signing certificate: \"" + args.CertificatePfxFilename + "\"");
-                if (!File.Exists(args.FilenameToStamp))
+                if (!File.Exists(args.CertificatePfxFilename))
                 {
                     output.WriteOutputLine("Certificate file does not exist.");
                     return ProgramExitCode.CertificateError;
