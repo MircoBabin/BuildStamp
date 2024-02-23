@@ -212,7 +212,7 @@ end.
 
 ```
 
-* Fourth: add file Resources\ApplicationVersionInfo\VersionInfo.pas, but don't include in the Delphi project.
+* Fourth: add file Resources\ApplicationVersionInfo\VersionInfo.rc, but don't include in the Delphi project.
 
 ```rc
 // <BUILDSTAMP:BEGINSTAMP>
