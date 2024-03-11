@@ -250,12 +250,11 @@ BLOCK "VarFileInfo"
 
 ```pas
 program MyProgram;
-{$R Resources\ApplicationVersionInfo\VersionInfo.res}
 
 uses ...;
 
 {$R *.res}
-
+{$R Resources\ApplicationVersionInfo\VersionInfo.res}
 begin
 end.
 
