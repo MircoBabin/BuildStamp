@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 
 namespace BuildStamp
 {
@@ -178,6 +180,10 @@ namespace BuildStamp
                 {
                     output.WriteOutputLine("Error signing with authenticode.");
                     output.WriteOutputLine(ex.Message);
+
+                    var notValid = CheckCertificateValid(signingCertificate, output);
+                    if (notValid != ProgramExitCode.Success) return notValid;
+
                     return ProgramExitCode.SignSha1Error;
                 }
                 output.WriteOutputLine("Success: authenticode digital signature.");
@@ -202,6 +208,10 @@ namespace BuildStamp
                 {
                     output.WriteOutputLine("Error signing with sha-256.");
                     output.WriteOutputLine(ex.Message);
+
+                    var notValid = CheckCertificateValid(signingCertificate, output);
+                    if (notValid != ProgramExitCode.Success) return notValid;
+
                     return ProgramExitCode.SignSha256Error;
                 }
                 output.WriteOutputLine("Success: sha-256 digital signature.");
@@ -257,6 +267,49 @@ namespace BuildStamp
             }
 
             return exitcode;
+        }
+
+        private ProgramExitCode CheckCertificateValid(X509Certificate2 signingCertificate, ProgramOutput output)
+        {
+            DateTime validFrom;
+            DateTime validUpto;
+            {
+                var saveCulture = Thread.CurrentThread.CurrentCulture;
+                try
+                {
+                    Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+                    validFrom = DateTime.Parse(signingCertificate.GetEffectiveDateString(), CultureInfo.InvariantCulture).ToUniversalTime();
+                    validUpto = DateTime.Parse(signingCertificate.GetExpirationDateString(), CultureInfo.InvariantCulture).ToUniversalTime();
+                }
+                finally
+                {
+                    Thread.CurrentThread.CurrentCulture = saveCulture;
+                }
+            }
+
+            var now = DateTime.Now.ToUniversalTime();
+            if (now < validFrom || now > validUpto)
+            {
+                output.WriteOutputLine();
+                output.WriteOutputLine("Current time: " + DateTimeToHumanString(now) + " UTC.");
+                output.WriteOutputLine("The certificate is not valid.");
+
+                if (now < validFrom)
+                {
+                    output.WriteOutputLine("The valid from time (effective time) of the certificate is in the future. The certificate is not yet valid.");
+                    output.WriteOutputLine("Valid from: " + DateTimeToHumanString(validFrom) + " UTC.");
+                }
+
+                if (now > validUpto)
+                {
+                    output.WriteOutputLine("The valid upto time (expiration time) of the certificate is in the past. The certificate has expired.");
+                    output.WriteOutputLine("Valid upto: " + DateTimeToHumanString(validUpto) + " UTC.");
+                }
+
+                return ProgramExitCode.CertificateError;
+            }
+
+            return ProgramExitCode.Success;
         }
 
         public string OidToHumanString(string inputOid)
