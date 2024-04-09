@@ -1,5 +1,10 @@
 # BuildStamp changelog
 
+## Version 2.3
+Release date: 9 april 2024
+
+* fix sign: on failure check certificate valid from and upto time.
+
 ## Version 2.2
 Release date: 22 february 2024
 
