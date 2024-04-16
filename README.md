@@ -23,7 +23,7 @@ The minimum .NET framework required is 4.0.
 Execute **BuildStamp.exe** without parameters to view the help.
 
 ```
-BuildStamp version 2.2
+BuildStamp version 2.3
 https://github.com/MircoBabin/BuildStamp - MIT license
 
 BuildStamp is a compilation tool.
