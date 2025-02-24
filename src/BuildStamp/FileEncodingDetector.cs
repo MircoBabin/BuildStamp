@@ -36,7 +36,7 @@ namespace BuildStamp
 
         public FileEncodingDetector(BomType type)
         {
-            switch(type)
+            switch (type)
             {
                 case BomType.UTF8:
                     setUTF8_WITH_BOM();
@@ -70,19 +70,19 @@ namespace BuildStamp
                 Array.Resize(ref bomBytes, bytes_read);
             }
 
-            if (bomBytes.Length == 3 && bomBytes[0] == 0xEF && bomBytes[1] == 0xBB && bomBytes[2] == 0xBF)
+            if (bomBytes.Length >= 3 && bomBytes[0] == 0xEF && bomBytes[1] == 0xBB && bomBytes[2] == 0xBF)
             {
                 setUTF8_WITH_BOM();
                 return;
             }
 
-            if (bomBytes.Length == 2 && bomBytes[0] == 0xFF && bomBytes[1] == 0xFE)
+            if (bomBytes.Length >= 2 && bomBytes[0] == 0xFF && bomBytes[1] == 0xFE)
             {
                 setUTF16LittleEndian_WITH_BOM();
                 return;
             }
 
-            if (bomBytes.Length == 2 && bomBytes[0] == 0xFE && bomBytes[1] == 0xFF)
+            if (bomBytes.Length >= 2 && bomBytes[0] == 0xFE && bomBytes[1] == 0xFF)
             {
                 setUTF16BigEndian_WITH_BOM();
                 return;
@@ -91,6 +91,7 @@ namespace BuildStamp
             /* If a Byte Order Mark (BOM) is not present, assume UTF-8 (is also ASCII) encoding. 
              * This will be mostly valid for a programming source file. 
              */
-            setUTF8_WITHOUT_BOM();        }
+            setUTF8_WITHOUT_BOM();
+        }
     }
 }
