@@ -1,5 +1,10 @@
 # BuildStamp changelog
 
+## Version 2.4
+Release date: 24 february 2025
+
+* fix: file encoding (UTF-8, UTF-16LE, UTF-16BE) detection.
+
 ## Version 2.3
 Release date: 9 april 2024
 
